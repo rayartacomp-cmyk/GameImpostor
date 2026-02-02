@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎮 GameImpostor - Play Now!</title>
+    <title>🎮 GameImpostor - Kata Mirip untuk Impostor</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -19,6 +19,8 @@
             --accent: #FF6B6B;
             --success: #06D6A0;
             --warning: #FFD166;
+            --citizen: #4ECDC4;
+            --impostor: #FF6B6B;
         }
         
         body {
@@ -26,6 +28,7 @@
             color: white;
             min-height: 100vh;
             padding: 20px;
+            line-height: 1.6;
         }
         
         .container {
@@ -33,7 +36,7 @@
             margin: 0 auto;
         }
         
-        /* Game Screens */
+        /* Screens */
         .screen {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
@@ -43,10 +46,6 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
             display: none;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        }
-        
-        .screen.active {
-            display: block;
             animation: fadeIn 0.5s;
         }
         
@@ -55,17 +54,23 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
+        .screen.active {
+            display: block;
+        }
+        
         /* Header */
         .header {
             text-align: center;
             margin-bottom: 30px;
-            padding: 20px;
         }
         
-        h1 {
+        .game-title {
             font-size: 2.8rem;
             margin-bottom: 10px;
-            color: white;
+            background: linear-gradient(90deg, var(--accent), var(--warning), var(--citizen));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
         }
         
         .subtitle {
@@ -73,29 +78,50 @@
             opacity: 0.9;
         }
         
-        /* Player List */
-        .player-list {
+        /* Common Elements */
+        h2 {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        h2 i {
+            color: var(--warning);
+        }
+        
+        .player-list, .category-grid, .vote-options {
             margin: 20px 0;
         }
         
-        .player-item {
+        .player-item, .category-item, .vote-item {
             background: rgba(255, 255, 255, 0.1);
-            padding: 15px 20px;
+            padding: 15px;
             margin: 10px 0;
             border-radius: 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             transition: all 0.3s;
+            cursor: pointer;
         }
         
-        .player-item:hover {
+        .player-item:hover, .category-item:hover, .vote-item:hover {
             background: rgba(255, 255, 255, 0.15);
             transform: translateX(5px);
         }
         
-        /* Input & Buttons */
-        .input-group {
+        .category-item.selected {
+            background: var(--secondary);
+            box-shadow: 0 5px 15px rgba(108, 99, 255, 0.4);
+        }
+        
+        .vote-item.selected {
+            background: var(--secondary);
+        }
+        
+        /* Inputs & Buttons */
+        .input-row {
             display: flex;
             gap: 10px;
             margin: 20px 0;
@@ -120,7 +146,7 @@
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
@@ -142,119 +168,123 @@
             font-size: 14px;
         }
         
-        /* Categories */
-        .categories {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 15px;
-            margin: 20px 0;
-        }
-        
-        .category {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .category:hover {
-            background: rgba(255, 255, 255, 0.15);
-            transform: translateY(-5px);
-        }
-        
-        .category.selected {
-            background: var(--secondary);
-            box-shadow: 0 5px 15px rgba(108, 99, 255, 0.4);
-        }
-        
         /* Role Reveal */
-        .role-reveal {
+        .role-reveal-container {
             text-align: center;
-            min-height: 300px;
+            padding: 20px;
+        }
+        
+        .current-player {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: var(--warning);
+        }
+        
+        .swipe-instruction {
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 30px;
+        }
+        
+        .role-card {
+            background: white;
+            color: #333;
+            padding: 40px 30px;
+            border-radius: 15px;
+            margin: 20px auto;
+            max-width: 500px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            min-height: 250px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
         }
         
-        .role-card {
-            background: white;
-            color: #333;
-            padding: 30px;
-            border-radius: 15px;
-            width: 100%;
-            max-width: 400px;
-            margin: 20px 0;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-        }
-        
-        .player-name {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 20px;
-            color: var(--primary);
-        }
-        
-        .role {
+        .role-title {
             font-size: 2.5rem;
             font-weight: bold;
-            margin: 20px 0;
+            margin-bottom: 20px;
         }
         
-        .impostor {
-            color: var(--accent);
+        .impostor-role {
+            color: var(--impostor);
         }
         
-        .citizen {
-            color: var(--success);
+        .citizen-role {
+            color: var(--citizen);
         }
         
-        .word {
-            font-size: 2rem;
+        .word-display {
+            font-size: 2.2rem;
             font-weight: bold;
-            margin: 20px 0;
+            margin: 15px 0;
             color: var(--primary);
+            text-align: center;
         }
         
-        .hint {
-            font-size: 1.1rem;
+        .similar-word {
+            font-size: 1.5rem;
+            color: #666;
+            margin-top: 10px;
+            font-style: italic;
+        }
+        
+        .category-info {
             color: #666;
             margin-top: 15px;
+            font-size: 1.1rem;
         }
         
-        /* Timer */
+        .swipe-arrow {
+            font-size: 4rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin: 20px 0;
+            cursor: pointer;
+            transition: all 0.3s;
+            animation: bounce 2s infinite;
+        }
+        
+        .swipe-arrow:hover {
+            color: var(--warning);
+            transform: scale(1.2);
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        /* Game Play */
         .timer {
-            font-size: 3rem;
+            font-size: 3.5rem;
             font-weight: bold;
             text-align: center;
             margin: 30px 0;
             color: var(--warning);
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
         }
         
-        /* Voting */
-        .vote-options {
+        .game-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
             margin: 20px 0;
         }
         
-        .vote-option {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
+        /* Similar Words Indicator */
+        .similarity-indicator {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-left: 10px;
         }
         
-        .vote-option:hover {
-            background: rgba(255, 255, 255, 0.15);
-            transform: translateX(10px);
-        }
-        
-        .vote-option.selected {
-            background: var(--secondary);
-        }
+        .high-similarity { color: var(--success); }
+        .medium-similarity { color: var(--warning); }
+        .low-similarity { color: var(--accent); }
         
         /* Results */
         .result-item {
@@ -275,16 +305,56 @@
             font-weight: bold;
         }
         
+        .impostor-badge {
+            background: var(--impostor);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-left: 10px;
+        }
+        
+        .citizen-badge {
+            background: var(--citizen);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-left: 10px;
+        }
+        
         /* Progress */
-        .progress {
+        .progress-info {
             text-align: center;
             margin: 20px 0;
             color: rgba(255, 255, 255, 0.7);
         }
         
+        /* Similar Words Section */
+        .similar-words-section {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+        
+        .similar-words-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .similar-word-tag {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        
         /* Instructions */
         .instructions {
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.05);
             padding: 15px;
             border-radius: 10px;
             margin: 20px 0;
@@ -302,16 +372,28 @@
                 padding: 20px;
             }
             
-            h1 {
-                font-size: 2rem;
+            .game-title {
+                font-size: 2.2rem;
             }
             
-            .input-group {
+            .input-row {
                 flex-direction: column;
             }
             
-            .categories {
-                grid-template-columns: repeat(2, 1fr);
+            .role-card {
+                padding: 30px 20px;
+            }
+            
+            .role-title {
+                font-size: 2rem;
+            }
+            
+            .word-display {
+                font-size: 1.8rem;
+            }
+            
+            .timer {
+                font-size: 2.8rem;
             }
         }
     </style>
@@ -320,79 +402,79 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <h1><i class="fas fa-gamepad"></i> GameImpostor</h1>
-            <div class="subtitle">Tebak Kata dengan Impostor - Main Langsung di Browser!</div>
+            <h1 class="game-title">🎮 GameImpostor</h1>
+            <div class="subtitle">Impostor mendapatkan kata MIRIP untuk berbaur!</div>
         </div>
         
-        <!-- Screen 1: Add Players -->
+        <!-- Screen 1: Players -->
         <div id="screenPlayers" class="screen active">
             <h2><i class="fas fa-users"></i> Tambah Pemain</h2>
             <p>Tambahkan minimal 3 pemain untuk memulai game.</p>
             
-            <div class="input-group">
-                <input type="text" id="playerInput" placeholder="Masukkan nama pemain">
+            <div class="input-row">
+                <input type="text" id="playerInput" placeholder="Masukkan nama pemain" autocomplete="off">
                 <button onclick="addPlayer()"><i class="fas fa-plus"></i> Tambah</button>
             </div>
             
             <div class="player-list" id="playerList">
-                <!-- Player items will be added here -->
+                <!-- Players will appear here -->
             </div>
             
             <div class="instructions">
-                <i class="fas fa-info-circle"></i> Tekan Enter untuk menambah pemain cepat
+                <i class="fas fa-lightbulb"></i> Tekan Enter untuk menambah pemain cepat. Minimal 3 pemain.
             </div>
             
-            <button id="nextToCategories" onclick="goToCategories()" disabled>
-                Lanjut ke Kategori <i class="fas fa-arrow-right"></i>
+            <button id="nextBtn" onclick="goToCategories()" disabled>
+                <i class="fas fa-arrow-right"></i> Lanjut ke Kategori
             </button>
         </div>
         
         <!-- Screen 2: Categories -->
         <div id="screenCategories" class="screen">
             <h2><i class="fas fa-th-list"></i> Pilih Kategori</h2>
-            <p>Pilih minimal 1 kategori untuk permainan.</p>
+            <p>Pilih minimal 1 kategori. Setiap kategori punya 30+ kata.</p>
             
-            <div class="categories" id="categoriesList">
-                <!-- Categories will be added here -->
+            <div class="category-grid" id="categoryGrid">
+                <!-- Categories will appear here -->
             </div>
             
-            <div class="progress" id="categoriesProgress">0 kategori terpilih</div>
+            <div class="progress-info" id="categoryProgress">0 kategori terpilih</div>
             
             <button onclick="goBackToPlayers()"><i class="fas fa-arrow-left"></i> Kembali</button>
-            <button id="nextToSettings" onclick="goToSettings()" disabled>
-                Lanjut ke Pengaturan <i class="fas fa-arrow-right"></i>
+            <button id="categoriesNextBtn" onclick="goToSettings()" disabled>
+                <i class="fas fa-arrow-right"></i> Pengaturan Game
             </button>
         </div>
         
-        <!-- Screen 3: Game Settings -->
+        <!-- Screen 3: Settings -->
         <div id="screenSettings" class="screen">
             <h2><i class="fas fa-cog"></i> Pengaturan Game</h2>
             
-            <div style="margin: 25px 0;">
+            <div class="game-info">
                 <h3><i class="fas fa-user-secret"></i> Jumlah Impostor</h3>
-                <div class="input-group">
-                    <button onclick="changeImpostors(-1)" id="decreaseImpostors">-</button>
-                    <input type="text" id="impostorCount" value="1" readonly style="text-align: center;">
-                    <button onclick="changeImpostors(1)" id="increaseImpostors">+</button>
+                <div class="input-row">
+                    <button onclick="changeImpostorCount(-1)" id="decreaseBtn">-</button>
+                    <input type="text" id="impostorCount" value="1" readonly style="text-align: center; font-size: 1.2rem;">
+                    <button onclick="changeImpostorCount(1)" id="increaseBtn">+</button>
                 </div>
-                <div style="text-align: center; margin-top: 10px; color: rgba(255,255,255,0.8);" id="impostorRecommendation">
-                    Rekomendasi untuk 3 pemain: 1
-                </div>
-            </div>
-            
-            <div style="margin: 25px 0;">
-                <h3><i class="fas fa-lightbulb"></i> Petunjuk untuk Impostor</h3>
-                <div class="input-group">
-                    <button onclick="setImpostorHint(false)" id="hintDisabled" style="flex: 1; background: var(--secondary);">Nonaktif</button>
-                    <button onclick="setImpostorHint(true)" id="hintEnabled" style="flex: 1; background: rgba(255,255,255,0.1);">Aktif</button>
+                <div style="text-align: center; margin-top: 10px; color: rgba(255,255,255,0.8);">
+                    Rekomendasi: <span id="recommendation">1 imposter</span>
                 </div>
             </div>
             
-            <div style="margin: 25px 0;">
+            <div class="game-info">
+                <h3><i class="fas fa-brain"></i> Sistem Kata Mirip</h3>
+                <p>Impostor akan mendapatkan kata yang <strong>sangat mirip</strong> dengan kata asli untuk membantu mereka berbaur!</p>
+                <div class="similar-words-list" id="similarExample">
+                    <!-- Similar words example -->
+                </div>
+            </div>
+            
+            <div class="game-info">
                 <h3><i class="fas fa-clock"></i> Durasi Ronde</h3>
-                <div class="input-group">
+                <div class="input-row">
                     <button onclick="changeRoundTime(-30)">-30s</button>
-                    <input type="text" id="roundTime" value="02:00" readonly style="text-align: center; font-size: 1.5rem;">
+                    <input type="text" id="roundTime" value="02:00" readonly style="text-align: center; font-size: 1.2rem;">
                     <button onclick="changeRoundTime(30)">+30s</button>
                 </div>
             </div>
@@ -403,73 +485,84 @@
         
         <!-- Screen 4: Role Reveal -->
         <div id="screenRoleReveal" class="screen">
-            <div class="role-reveal">
-                <h2 id="currentPlayerName">Ray</h2>
-                <p style="margin-bottom: 20px; color: rgba(255,255,255,0.8);">
-                    Geser ke atas untuk mengungkap kata rahasia
-                </p>
+            <div class="role-reveal-container">
+                <div class="current-player" id="currentPlayerName">Ray</div>
+                <div class="swipe-instruction">Klik panah untuk "swipe" dan lihat kata Anda</div>
                 
-                <div class="role-card">
-                    <div id="roleText" class="role">?</div>
-                    <div id="wordText" class="word">Swipe ↑</div>
-                    <div id="hintText" class="hint"></div>
+                <div class="role-card" id="roleCard">
+                    <div class="role-title">?</div>
+                    <div class="word-display" id="wordDisplay">Swipe untuk melihat</div>
+                    <div class="category-info" id="categoryInfo"></div>
+                    <div class="similar-word" id="similarWordHint"></div>
                 </div>
                 
-                <div style="margin-top: 30px; font-size: 3rem; color: rgba(255,255,255,0.5);" id="swipeArrow">↑</div>
-                <p style="margin-top: 10px; color: rgba(255,255,255,0.6);">
-                    Klik/tap panah di atas untuk "swipe"
-                </p>
+                <div class="swipe-arrow" id="swipeArrow" onclick="revealRole()">
+                    ↑<br>
+                    <span style="font-size: 1rem;">KLIK UNTUK SWIPE</span>
+                </div>
                 
-                <button id="nextPlayerBtn" onclick="nextPlayer()" style="margin-top: 30px;">
-                    Pemain Selanjutnya <i class="fas fa-arrow-right"></i>
+                <button id="nextPlayerBtn" onclick="nextPlayer()" style="display: none; margin-top: 20px;">
+                    <i class="fas fa-arrow-right"></i> Pemain Selanjutnya
                 </button>
             </div>
         </div>
         
         <!-- Screen 5: Game Play -->
         <div id="screenGame" class="screen">
-            <h2><i class="fas fa-comments"></i> Diskusi</h2>
-            <p id="currentDiscussionPlayer">Ray memulai diskusi!</p>
+            <h2><i class="fas fa-comments"></i> Waktu Diskusi</h2>
             
             <div class="timer" id="gameTimer">02:00</div>
             
-            <div style="margin: 25px 0;">
-                <h3>Kategori: <span id="gameCategory">Makanan</span></h3>
-                <div class="instructions" id="playerInstructions">
-                    Berikan petunjuk tentang kata Anda tanpa mengungkapkannya langsung!
+            <div class="game-info">
+                <h3><i class="fas fa-tag"></i> Kategori: <span id="currentCategoryDisplay">Makanan</span></h3>
+                <p id="playerInstruction">Berikan petunjuk tentang kata Anda tanpa mengungkapkannya langsung!</p>
+                
+                <div class="similar-words-section" id="similarWordsHint">
+                    <h4><i class="fas fa-random"></i> Kata-kata Mirip dalam Kategori:</h4>
+                    <div class="similar-words-list" id="similarWordsList">
+                        <!-- Similar words will appear here -->
+                    </div>
                 </div>
             </div>
             
-            <div style="margin: 25px 0;">
-                <h3>Pemain:</h3>
-                <div id="gamePlayerList">
-                    <!-- Game player list -->
+            <div class="game-info">
+                <h3><i class="fas fa-users"></i> Pemain:</h3>
+                <div id="gamePlayersList">
+                    <!-- Game players list -->
                 </div>
             </div>
             
             <button onclick="startVoting()"><i class="fas fa-vote-yea"></i> Mulai Voting</button>
-            <button onclick="skipTurn()" style="background: var(--warning); color: #333;"><i class="fas fa-forward"></i> Lewati</button>
+            <button onclick="skipTurn()" style="background: var(--warning); color: #333;">
+                <i class="fas fa-forward"></i> Lewati Ronde
+            </button>
         </div>
         
         <!-- Screen 6: Voting -->
         <div id="screenVoting" class="screen">
-            <h2><i class="fas fa-vote-yea"></i> Voting</h2>
-            <p id="votingInstruction">Pilih siapa yang menurut Anda adalah Impostor:</p>
+            <h2><i class="fas fa-vote-yea"></i> Voting Time</h2>
+            <p>Pilih siapa yang menurut Anda adalah Impostor:</p>
             
             <div class="vote-options" id="voteOptions">
-                <!-- Voting options -->
+                <!-- Voting options will appear here -->
             </div>
             
-            <button onclick="submitVote()" id="submitVoteBtn" disabled><i class="fas fa-check"></i> Submit Vote</button>
-            <button onclick="seeResults()" id="seeResultsBtn" style="display: none;"><i class="fas fa-chart-bar"></i> Lihat Hasil</button>
+            <div class="progress-info" id="votingProgress">Belum ada yang vote</div>
+            
+            <button id="submitVoteBtn" onclick="submitVote()" disabled>
+                <i class="fas fa-check"></i> Submit Vote
+            </button>
+            <button id="seeResultsBtn" onclick="showResults()" style="display: none;">
+                <i class="fas fa-chart-bar"></i> Lihat Hasil
+            </button>
         </div>
         
         <!-- Screen 7: Results -->
         <div id="screenResults" class="screen">
             <h2><i class="fas fa-trophy"></i> Hasil Game</h2>
             
-            <div id="resultsContainer">
-                <!-- Results will be shown here -->
+            <div id="resultsContent">
+                <!-- Results will appear here -->
             </div>
             
             <button onclick="playAgain()" style="background: var(--success); margin-top: 30px;">
@@ -482,71 +575,133 @@
     </div>
 
     <script>
-        // Game Data
+        // ==================== GAME DATA ====================
         const gameData = {
             players: [],
             impostors: [],
             selectedCategories: [],
             categories: {
-                "Makanan": ["Pizza", "Sushi", "Rendang", "Nasi Goreng", "Hamburger", "Taco", "Pasta", "Dim Sum", "Ramen", "Croissant", "Bakso", "Satay", "Fried Chicken", "Pad Thai", "Pho", "Donat", "Es Krim", "Brownies", "Cheesecake", "Tiramisu", "Sate Ayam", "Gado-gado", "Soto Ayam", "Martabak", "Pempek", "Bakmi Goreng", "Lumpia", "Kwetiau", "Capcay", "Tahu Gejrot", "Cendol", "Klepon", "Onde-onde", "Serabi", "Dadar Gulung"],
-                "Selebriti": ["Tom Cruise", "Beyoncé", "Leonardo DiCaprio", "Taylor Swift", "Robert Downey Jr.", "Jennifer Lawrence", "Brad Pitt", "Ariana Grande", "Johnny Depp", "Rihanna", "Will Smith", "Angelina Jolie", "Chris Hemsworth", "Lady Gaga", "Dwayne Johnson", "Emma Watson", "Chris Evans", "Selena Gomez", "Keanu Reeves", "Miley Cyrus", "Ryan Reynolds", "Scarlett Johansson", "Justin Bieber", "Natalie Portman", "Bruno Mars", "Margot Robbie", "Harry Styles", "Anne Hathaway", "The Rock", "Zendaya", "Tom Holland", "Gal Gadot", "Ed Sheeran", "Jennifer Aniston", "Robert Pattinson"],
-                "Tempat": ["Menara Eiffel", "Piramida Giza", "Tembok Besar China", "Taj Mahal", "Colosseum", "Patung Liberty", "Machu Picchu", "Sydney Opera House", "Bali", "Borobudur", "Grand Canyon", "Great Barrier Reef", "Venice", "Santorini", "Bora Bora", "Tokyo", "New York City", "Paris", "London", "Dubai", "Rio de Janeiro", "Cape Town", "Bangkok", "Singapore", "Hong Kong", "Roma", "Barcelona", "Amsterdam", "Prague", "Vienna", "Istanbul", "Marrakech", "Kyoto", "Seoul", "Moscow"],
-                "Hollywood": ["Avengers: Endgame", "Titanic", "The Godfather", "Star Wars", "Jurassic Park", "Harry Potter", "The Dark Knight", "Forrest Gump", "Inception", "Pulp Fiction", "The Matrix", "Frozen", "The Lion King", "Avatar", "The Shawshank Redemption", "Spider-Man: No Way Home", "Black Panther", "La La Land", "Joker", "Parasite", "Interstellar", "Gladiator", "The Social Network", "Casablanca", "Gone with the Wind", "Psycho", "The Silence of the Lambs", "Schindler's List", "Back to the Future", "E.T.", "Indiana Jones", "Terminator", "Die Hard", "Mission: Impossible", "John Wick"],
-                "Waktu Pesta": ["Tarian Gangnam Style", "Karaoke", "Balo-balo", "Kostum Badut", "Minuman Mocktail", "Lampu Disko", "Permainan Twister", "Foto Booth", "Piñata", "DJ Pesta", "Kue Ulang Tahun", "Tepuk Tangan", "Serbuk Konfeti", "Terompet Pesta", "Topi Tahun Baru", "Permainan Tebak Gambar", "Marathon Film", "Karaoke Spontan", "Permainan Kartu", "Dance Off", "Permainan Tebak Lagu", "Kuis Trivia", "Permainan Charades", "Truth or Dare", "Membuat Cocktail", "Face Painting", "Karaoke Duet", "Permainan Pictionary", "Tebak Umur", "Permainan Tebak Suara", "Kostum Superhero", "Tari Bersama", "Permainan Tebak Rasa", "Karaoke Group", "Permainan Puzzle"]
+                "Makanan": [
+                    "Pizza", "Sushi", "Rendang", "Nasi Goreng", "Hamburger", "Taco", "Pasta", "Dim Sum", 
+                    "Ramen", "Croissant", "Bakso", "Satay", "Fried Chicken", "Pad Thai", "Pho", "Donat", 
+                    "Es Krim", "Brownies", "Cheesecake", "Tiramisu", "Sate Ayam", "Gado-gado", "Soto Ayam", 
+                    "Martabak", "Pempek", "Bakmi Goreng", "Lumpia", "Kwetiau", "Capcay", "Tahu Gejrot"
+                ],
+                "Selebriti": [
+                    "Tom Cruise", "Beyoncé", "Leonardo DiCaprio", "Taylor Swift", "Robert Downey Jr.", 
+                    "Jennifer Lawrence", "Brad Pitt", "Ariana Grande", "Johnny Depp", "Rihanna", 
+                    "Will Smith", "Angelina Jolie", "Chris Hemsworth", "Lady Gaga", "Dwayne Johnson", 
+                    "Emma Watson", "Chris Evans", "Selena Gomez", "Keanu Reeves", "Miley Cyrus", 
+                    "Ryan Reynolds", "Scarlett Johansson", "Justin Bieber", "Natalie Portman", "Bruno Mars", 
+                    "Margot Robbie", "Harry Styles", "Anne Hathaway", "The Rock", "Zendaya"
+                ],
+                "Tempat": [
+                    "Menara Eiffel", "Piramida Giza", "Tembok Besar China", "Taj Mahal", "Colosseum", 
+                    "Patung Liberty", "Machu Picchu", "Sydney Opera House", "Bali", "Borobudur", 
+                    "Grand Canyon", "Great Barrier Reef", "Venice", "Santorini", "Bora Bora", 
+                    "Tokyo", "New York City", "Paris", "London", "Dubai", "Rio de Janeiro", 
+                    "Cape Town", "Bangkok", "Singapore", "Hong Kong", "Roma", "Barcelona", 
+                    "Amsterdam", "Prague", "Vienna"
+                ],
+                "Film Hollywood": [
+                    "Avengers: Endgame", "Titanic", "The Godfather", "Star Wars", "Jurassic Park", 
+                    "Harry Potter", "The Dark Knight", "Forrest Gump", "Inception", "Pulp Fiction", 
+                    "The Matrix", "Frozen", "The Lion King", "Avatar", "The Shawshank Redemption", 
+                    "Spider-Man: No Way Home", "Black Panther", "La La Land", "Joker", "Parasite", 
+                    "Interstellar", "Gladiator", "The Social Network", "Casablanca", "Gone with the Wind", 
+                    "Psycho", "The Silence of the Lambs", "Schindler's List", "Back to the Future", "E.T."
+                ],
+                "Hewan": [
+                    "Harimau Sumatra", "Komodo", "Orangutan", "Gajah Asia", "Badak Jawa", 
+                    "Anjing", "Kucing", "Burung Beo", "Ikan Koi", "Kelinci", "Hamster", 
+                    "Ular Python", "Kadal Chameleon", "Burung Merak", "Kupu-kupu Monarch", 
+                    "Panda", "Koala", "Penguin", "Singa", "Zebra", "Jerapah", "Gorilla", 
+                    "Simpanse", "Kanguru", "Platypus", "Armadillo", "Sloth", "Otter", 
+                    "Red Panda", "Flamingo"
+                ]
+            },
+            // Similar words mapping for impostors
+            similarWordsMap: {
+                "Pizza": ["Pasta", "Lasagna", "Calzone", "Focaccia", "Garlic Bread"],
+                "Sushi": ["Sashimi", "Tempura", "Maki", "Nigiri", "Ramen"],
+                "Rendang": ["Gulai", "Kari", "Semur", "Opor", "Kalio"],
+                "Nasi Goreng": ["Mie Goreng", "Bihun Goreng", "Kwetiau Goreng", "Capcay", "Chicken Fried Rice"],
+                "Hamburger": ["Cheeseburger", "Sandwich", "Burger King", "Whopper", "Big Mac"],
+                "Tom Cruise": ["Brad Pitt", "Leonardo DiCaprio", "Matt Damon", "Will Smith", "Johnny Depp"],
+                "Beyoncé": ["Rihanna", "Lady Gaga", "Ariana Grande", "Taylor Swift", "Jennifer Lopez"],
+                "Menara Eiffel": ["Menara Pisa", "Patung Liberty", "Colosseum", "Big Ben", "Sydney Opera"],
+                "Tokyo": ["Osaka", "Kyoto", "Seoul", "Beijing", "Shanghai"],
+                "Avengers: Endgame": ["Avengers: Infinity War", "Iron Man", "Captain America", "Thor", "Black Panther"],
+                "Harimau Sumatra": ["Harimau Bengal", "Singa", "Jaguar", "Leopard", "Cheetah"]
             },
             currentCategory: "",
-            currentWord: "",
-            impostorHint: true,
+            actualWord: "", // Kata asli untuk warga
+            impostorWord: "", // Kata mirip untuk impostor
             roundDuration: 120,
             currentPlayerIndex: 0,
             votes: {},
-            revealedImpostors: []
+            gameState: "setup"
         };
 
-        // DOM Elements
-        const screens = {
-            players: document.getElementById('screenPlayers'),
-            categories: document.getElementById('screenCategories'),
-            settings: document.getElementById('screenSettings'),
-            roleReveal: document.getElementById('screenRoleReveal'),
-            game: document.getElementById('screenGame'),
-            voting: document.getElementById('screenVoting'),
-            results: document.getElementById('screenResults')
-        };
-
-        // Initialize game
+        // ==================== GAME FUNCTIONS ====================
+        
+        // Initialize the game
         function initGame() {
-            // Setup categories
-            const categoriesList = document.getElementById('categoriesList');
-            categoriesList.innerHTML = '';
+            // Setup categories grid
+            const categoryGrid = document.getElementById('categoryGrid');
+            categoryGrid.innerHTML = '';
             
             for (const category in gameData.categories) {
                 const div = document.createElement('div');
-                div.className = 'category';
+                div.className = 'category-item';
                 div.innerHTML = `
-                    <div style="font-weight: bold; margin-bottom: 5px;">${category}</div>
-                    <div style="font-size: 0.9rem; opacity: 0.8;">${gameData.categories[category].length} kata</div>
+                    <div>
+                        <div style="font-weight: bold; font-size: 1.1rem;">${category}</div>
+                        <div style="font-size: 0.9rem; opacity: 0.8;">${gameData.categories[category].length} kata</div>
+                    </div>
+                    <div style="font-size: 1.5rem;">📚</div>
                 `;
                 div.onclick = () => toggleCategory(category, div);
-                categoriesList.appendChild(div);
+                categoryGrid.appendChild(div);
             }
             
-            // Setup keyboard input
+            // Setup similar words example
+            updateSimilarExample();
+            
+            // Enter key for adding players
             document.getElementById('playerInput').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    addPlayer();
-                }
+                if (e.key === 'Enter') addPlayer();
             });
             
-            // Setup swipe arrow
-            document.getElementById('swipeArrow').addEventListener('click', revealRole);
+            // Load from URL if any
+            loadFromURL();
+        }
+        
+        // Update similar words example
+        function updateSimilarExample() {
+            const exampleDiv = document.getElementById('similarExample');
+            exampleDiv.innerHTML = '';
             
-            // Load players from URL if any
+            const examples = [
+                { actual: "Pizza", similar: "Pasta, Lasagna, Calzone" },
+                { actual: "Tokyo", similar: "Osaka, Kyoto, Seoul" },
+                { actual: "Beyoncé", similar: "Rihanna, Taylor Swift, Ariana Grande" }
+            ];
+            
+            examples.forEach(example => {
+                const div = document.createElement('div');
+                div.className = 'similar-word-tag';
+                div.innerHTML = `<strong>${example.actual}</strong> → ${example.similar}`;
+                exampleDiv.appendChild(div);
+            });
+        }
+        
+        // Load players from URL
+        function loadFromURL() {
             const urlParams = new URLSearchParams(window.location.search);
             const playersParam = urlParams.get('players');
             if (playersParam) {
-                const players = playersParam.split(',');
-                players.forEach(player => {
+                playersParam.split(',').forEach(player => {
                     if (player.trim()) {
                         gameData.players.push({
                             id: Date.now() + Math.random(),
@@ -557,10 +712,10 @@
                     }
                 });
                 updatePlayerList();
-                checkStartButton();
+                checkNextButton();
             }
         }
-
+        
         // Player management
         function addPlayer() {
             const input = document.getElementById('playerInput');
@@ -576,19 +731,17 @@
                 
                 input.value = '';
                 updatePlayerList();
-                checkStartButton();
+                checkNextButton();
                 input.focus();
-            } else if (name) {
-                alert('Nama pemain sudah ada!');
             }
         }
-
+        
         function removePlayer(id) {
             gameData.players = gameData.players.filter(p => p.id !== id);
             updatePlayerList();
-            checkStartButton();
+            checkNextButton();
         }
-
+        
         function updatePlayerList() {
             const playerList = document.getElementById('playerList');
             playerList.innerHTML = '';
@@ -599,63 +752,66 @@
                 div.innerHTML = `
                     <div>
                         <span style="font-weight: bold;">${player.name}</span>
-                        <span style="margin-left: 10px; font-size: 0.9rem; opacity: 0.8;">Pemain ${index + 1}</span>
+                        <span style="margin-left: 10px; font-size: 0.9rem; opacity: 0.8;">
+                            Pemain ${index + 1}
+                        </span>
                     </div>
-                    <button class="btn-small" onclick="removePlayer(${player.id})"><i class="fas fa-times"></i></button>
+                    <button class="btn-small" onclick="removePlayer(${player.id})">
+                        <i class="fas fa-times"></i>
+                    </button>
                 `;
                 playerList.appendChild(div);
             });
         }
-
-        function checkStartButton() {
-            const btn = document.getElementById('nextToCategories');
-            btn.disabled = gameData.players.length < 3;
-            btn.innerHTML = gameData.players.length >= 3 
-                ? `Lanjut ke Kategori (${gameData.players.length} pemain) <i class="fas fa-arrow-right"></i>` 
-                : `Lanjut ke Kategori (butuh ${3 - gameData.players.length} lagi)`;
+        
+        function checkNextButton() {
+            const btn = document.getElementById('nextBtn');
+            const hasEnoughPlayers = gameData.players.length >= 3;
+            btn.disabled = !hasEnoughPlayers;
+            btn.innerHTML = hasEnoughPlayers 
+                ? `<i class="fas fa-arrow-right"></i> Lanjut ke Kategori (${gameData.players.length} pemain)`
+                : `<i class="fas fa-arrow-right"></i> Butuh ${3 - gameData.players.length} pemain lagi`;
         }
-
+        
         // Category selection
         function toggleCategory(category, element) {
-            if (gameData.selectedCategories.includes(category)) {
-                gameData.selectedCategories = gameData.selectedCategories.filter(c => c !== category);
-                element.classList.remove('selected');
-            } else {
+            const index = gameData.selectedCategories.indexOf(category);
+            
+            if (index === -1) {
                 gameData.selectedCategories.push(category);
                 element.classList.add('selected');
+            } else {
+                gameData.selectedCategories.splice(index, 1);
+                element.classList.remove('selected');
             }
             
-            document.getElementById('categoriesProgress').textContent = 
-                `${gameData.selectedCategories.length} kategori terpilih`;
-            
-            document.getElementById('nextToSettings').disabled = gameData.selectedCategories.length === 0;
+            // Update progress
+            const count = gameData.selectedCategories.length;
+            document.getElementById('categoryProgress').textContent = 
+                `${count} kategori terpilih`;
+            document.getElementById('categoriesNextBtn').disabled = count === 0;
         }
-
-        // Settings
-        function changeImpostors(delta) {
+        
+        // Game settings
+        function changeImpostorCount(delta) {
             const input = document.getElementById('impostorCount');
-            let value = parseInt(input.value) + delta;
+            let count = parseInt(input.value) + delta;
             const maxImpostors = Math.max(1, Math.floor(gameData.players.length / 2));
             
-            if (value >= 1 && value <= maxImpostors) {
-                input.value = value;
+            if (count >= 1 && count <= maxImpostors) {
+                input.value = count;
                 
                 // Update recommendation
-                document.getElementById('impostorRecommendation').textContent = 
-                    `Rekomendasi untuk ${gameData.players.length} pemain: ${Math.max(1, Math.floor(gameData.players.length / 3))}`;
+                const recommended = Math.max(1, Math.floor(gameData.players.length / 3));
+                document.getElementById('recommendation').textContent = 
+                    `${recommended} imposter (rekomendasi)`;
                 
-                // Enable/disable buttons
-                document.getElementById('decreaseImpostors').disabled = value <= 1;
-                document.getElementById('increaseImpostors').disabled = value >= maxImpostors;
+                // Update button states
+                document.getElementById('decreaseBtn').disabled = count <= 1;
+                document.getElementById('increaseBtn').disabled = count >= maxImpostors;
             }
         }
-
-        function setImpostorHint(enabled) {
-            gameData.impostorHint = enabled;
-            document.getElementById('hintDisabled').style.background = enabled ? 'rgba(255,255,255,0.1)' : 'var(--secondary)';
-            document.getElementById('hintEnabled').style.background = enabled ? 'var(--secondary)' : 'rgba(255,255,255,0.1)';
-        }
-
+        
         function changeRoundTime(seconds) {
             let totalSeconds = gameData.roundDuration + seconds;
             if (totalSeconds >= 60 && totalSeconds <= 300) {
@@ -666,35 +822,60 @@
                     `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
             }
         }
-
-        // Game flow
-        function goToCategories() {
-            screens.players.classList.remove('active');
-            screens.categories.classList.add('active');
-        }
-
-        function goBackToPlayers() {
-            screens.categories.classList.remove('active');
-            screens.players.classList.add('active');
-        }
-
-        function goToSettings() {
-            screens.categories.classList.remove('active');
-            screens.settings.classList.add('active');
+        
+        // Get similar word for impostor
+        function getSimilarWord(actualWord) {
+            // Check if we have predefined similar words
+            if (gameData.similarWordsMap[actualWord]) {
+                const similarWords = gameData.similarWordsMap[actualWord];
+                return similarWords[Math.floor(Math.random() * similarWords.length)];
+            }
             
-            // Set initial impostor count
-            const maxImpostors = Math.max(1, Math.floor(gameData.players.length / 2));
-            document.getElementById('impostorCount').value = Math.min(1, maxImpostors);
-            document.getElementById('impostorRecommendation').textContent = 
-                `Rekomendasi untuk ${gameData.players.length} pemain: ${Math.max(1, Math.floor(gameData.players.length / 3))}`;
-            document.getElementById('increaseImpostors').disabled = maxImpostors <= 1;
+            // Fallback: get random word from same category
+            const wordsInCategory = gameData.categories[gameData.currentCategory];
+            const otherWords = wordsInCategory.filter(word => word !== actualWord);
+            return otherWords.length > 0 
+                ? otherWords[Math.floor(Math.random() * otherWords.length)]
+                : "Kata Lain";
         }
-
+        
+        // Get similarity level (for display)
+        function getSimilarityLevel(actual, similar) {
+            // Simple similarity check (in real app, use more complex algorithm)
+            if (actual.includes(similar) || similar.includes(actual)) return "high";
+            
+            const actualWords = actual.toLowerCase().split(' ');
+            const similarWords = similar.toLowerCase().split(' ');
+            const commonWords = actualWords.filter(word => similarWords.includes(word));
+            
+            if (commonWords.length > 0) return "high";
+            if (actual.charAt(0) === similar.charAt(0)) return "medium";
+            return "low";
+        }
+        
+        // Navigation
+        function goToCategories() {
+            changeScreen('screenPlayers', 'screenCategories');
+        }
+        
+        function goBackToPlayers() {
+            changeScreen('screenCategories', 'screenPlayers');
+        }
+        
+        function goToSettings() {
+            changeScreen('screenCategories', 'screenSettings');
+        }
+        
         function goBackToCategories() {
-            screens.settings.classList.remove('active');
-            screens.categories.classList.add('active');
+            changeScreen('screenSettings', 'screenCategories');
         }
-
+        
+        function changeScreen(fromId, toId) {
+            document.getElementById(fromId).classList.remove('active');
+            document.getElementById(toId).classList.add('active');
+        }
+        
+        // Start the game
         function startGame() {
             // Select random impostors
             const impostorCount = parseInt(document.getElementById('impostorCount').value);
@@ -711,20 +892,44 @@
                 Math.floor(Math.random() * gameData.selectedCategories.length)
             ];
             const words = gameData.categories[gameData.currentCategory];
-            gameData.currentWord = words[Math.floor(Math.random() * words.length)];
+            gameData.actualWord = words[Math.floor(Math.random() * words.length)];
+            
+            // Get similar word for impostor
+            gameData.impostorWord = getSimilarWord(gameData.actualWord);
             
             // Reset game state
             gameData.currentPlayerIndex = 0;
             gameData.votes = {};
-            gameData.revealedImpostors = [];
+            
+            // Show similar words for the category
+            updateSimilarWordsList();
             
             // Go to role reveal
-            screens.settings.classList.remove('active');
-            screens.roleReveal.classList.add('active');
-            
+            changeScreen('screenSettings', 'screenRoleReveal');
             showPlayerRole();
         }
-
+        
+        // Update similar words list for display
+        function updateSimilarWordsList() {
+            const similarList = document.getElementById('similarWordsList');
+            similarList.innerHTML = '';
+            
+            // Get 5 random words from the same category (excluding the actual word)
+            const words = gameData.categories[gameData.currentCategory];
+            const otherWords = words.filter(word => word !== gameData.actualWord);
+            const randomWords = [...otherWords]
+                .sort(() => Math.random() - 0.5)
+                .slice(0, 5);
+            
+            randomWords.forEach(word => {
+                const div = document.createElement('div');
+                div.className = 'similar-word-tag';
+                div.textContent = word;
+                similarList.appendChild(div);
+            });
+        }
+        
+        // Show role for current player
         function showPlayerRole() {
             if (gameData.currentPlayerIndex >= gameData.players.length) {
                 // All players have seen their roles
@@ -733,132 +938,161 @@
             }
             
             const player = gameData.players[gameData.currentPlayerIndex];
-            const isImpostor = player.role === 'impostor';
-            
             document.getElementById('currentPlayerName').textContent = player.name;
-            document.getElementById('roleText').textContent = '?';
-            document.getElementById('wordText').textContent = 'Swipe ↑';
-            document.getElementById('hintText').textContent = '';
             
-            // Reset button text
-            const nextBtn = document.getElementById('nextPlayerBtn');
-            nextBtn.style.display = 'none';
-            nextBtn.textContent = gameData.currentPlayerIndex < gameData.players.length - 1 
-                ? 'Pemain Selanjutnya <i class="fas fa-arrow-right"></i>' 
-                : 'Mulai Game <i class="fas fa-play"></i>';
+            // Reset display
+            document.getElementById('wordDisplay').textContent = 'Swipe untuk melihat';
+            document.getElementById('wordDisplay').style.color = 'var(--primary)';
+            document.getElementById('categoryInfo').textContent = '';
+            document.getElementById('similarWordHint').textContent = '';
+            document.getElementById('roleCard').querySelector('.role-title').textContent = '?';
+            document.getElementById('roleCard').querySelector('.role-title').className = 'role-title';
+            
+            // Show swipe arrow, hide next button
+            document.getElementById('swipeArrow').style.display = 'block';
+            document.getElementById('nextPlayerBtn').style.display = 'none';
         }
-
+        
+        // Reveal role (when player "swipes")
         function revealRole() {
             const player = gameData.players[gameData.currentPlayerIndex];
             const isImpostor = player.role === 'impostor';
             
+            // Hide swipe arrow
+            document.getElementById('swipeArrow').style.display = 'none';
+            
+            // Update role title
+            const roleTitle = document.getElementById('roleCard').querySelector('.role-title');
             if (isImpostor) {
-                document.getElementById('roleText').textContent = '🕵️ IMPOSTOR';
-                document.getElementById('roleText').className = 'role impostor';
-                document.getElementById('wordText').textContent = 'Anda adalah Impostor!';
-                
-                if (gameData.impostorHint) {
-                    document.getElementById('hintText').textContent = 
-                        `Kata sebenarnya berkaitan dengan: ${gameData.currentCategory}`;
-                }
+                roleTitle.textContent = '🕵️ IMPOSTOR';
+                roleTitle.className = 'role-title impostor-role';
             } else {
-                document.getElementById('roleText').textContent = '👤 WARGA';
-                document.getElementById('roleText').className = 'role citizen';
-                document.getElementById('wordText').textContent = gameData.currentWord;
-                document.getElementById('hintText').textContent = 
-                    `Kategori: ${gameData.currentCategory}`;
+                roleTitle.textContent = '👤 WARGA';
+                roleTitle.className = 'role-title citizen-role';
             }
+            
+            // Show word
+            const wordDisplay = document.getElementById('wordDisplay');
+            if (isImpostor) {
+                wordDisplay.textContent = gameData.impostorWord;
+                wordDisplay.innerHTML += ` <span class="similarity-indicator high-similarity">(mirip dengan "${gameData.actualWord}")</span>`;
+                
+                // Show hint about actual word
+                document.getElementById('similarWordHint').textContent = 
+                    `Kata asli berkaitan dengan: ${gameData.currentCategory}`;
+            } else {
+                wordDisplay.textContent = gameData.actualWord;
+            }
+            
+            // Show category info
+            document.getElementById('categoryInfo').textContent = 
+                `Kategori: ${gameData.currentCategory}`;
             
             // Show next button
             document.getElementById('nextPlayerBtn').style.display = 'block';
-            document.getElementById('swipeArrow').style.display = 'none';
+            
+            // Update button text
+            const nextBtn = document.getElementById('nextPlayerBtn');
+            nextBtn.innerHTML = gameData.currentPlayerIndex < gameData.players.length - 1
+                ? `<i class="fas fa-arrow-right"></i> Pemain Selanjutnya`
+                : `<i class="fas fa-play"></i> Mulai Diskusi`;
         }
-
+        
+        // Move to next player
         function nextPlayer() {
             gameData.currentPlayerIndex++;
-            document.getElementById('swipeArrow').style.display = 'block';
             showPlayerRole();
         }
-
+        
+        // Start discussion phase
         function startDiscussion() {
-            screens.roleReveal.classList.remove('active');
-            screens.game.classList.add('active');
+            changeScreen('screenRoleReveal', 'screenGame');
             
-            // Set game info
-            document.getElementById('gameCategory').textContent = gameData.currentCategory;
-            document.getElementById('currentDiscussionPlayer').textContent = 
-                `${gameData.players[0].name} memulai diskusi!`;
+            // Set up game info
+            document.getElementById('currentCategoryDisplay').textContent = gameData.currentCategory;
             
             // Update player list for game
-            updateGamePlayerList();
+            updateGamePlayersList();
+            
+            // Update instruction based on current player
+            const currentPlayer = gameData.players[0];
+            const instruction = currentPlayer.role === 'impostor'
+                ? `Anda adalah Impostor! Kata Anda "${gameData.impostorWord}" mirip dengan "${gameData.actualWord}". Berbaurlah!`
+                : `Anda adalah Warga! Kata Anda adalah "${gameData.actualWord}". Berikan petunjuk tanpa mengungkap kata!`;
+            document.getElementById('playerInstruction').textContent = instruction;
             
             // Start timer
             startGameTimer();
         }
-
-        function updateGamePlayerList() {
-            const gamePlayerList = document.getElementById('gamePlayerList');
-            gamePlayerList.innerHTML = '';
+        
+        // Update game players list
+        function updateGamePlayersList() {
+            const gamePlayersList = document.getElementById('gamePlayersList');
+            gamePlayersList.innerHTML = '';
             
-            gameData.players.forEach(player => {
+            gameData.players.forEach((player, index) => {
                 const div = document.createElement('div');
                 div.className = 'player-item';
+                
+                const roleBadge = player.role === 'impostor' 
+                    ? '<span class="impostor-badge">⚡ Impostor</span>' 
+                    : '<span class="citizen-badge">🛡️ Warga</span>';
+                
+                const currentIndicator = index === 0 ? ' 👈 <span style="font-size: 0.9rem; opacity: 0.8;">(sedang memberi petunjuk)</span>' : '';
+                
                 div.innerHTML = `
                     <div>
                         <span style="font-weight: bold;">${player.name}</span>
-                        <span style="margin-left: 10px; font-size: 0.9rem; opacity: 0.8;">
-                            ${player.role === 'impostor' ? '⚡' : '🛡️'}
-                        </span>
+                        ${roleBadge}
                     </div>
-                    <div style="font-size: 0.9rem; opacity: 0.8;">
-                        ${player === gameData.players[0] ? '👈 Mulai' : ''}
-                    </div>
+                    <div>${currentIndicator}</div>
                 `;
-                gamePlayerList.appendChild(div);
+                gamePlayersList.appendChild(div);
             });
-            
-            // Update instructions
-            const currentPlayer = gameData.players[0];
-            const instruction = currentPlayer.role === 'impostor' 
-                ? 'Beri petunjuk palsu! Tirulah seperti Anda tahu kata sebenarnya.'
-                : 'Berikan petunjuk tentang kata Anda tanpa mengungkapkannya langsung!';
-            document.getElementById('playerInstructions').textContent = instruction;
         }
-
-        let gameTimerInterval;
+        
+        // Game timer
+        let gameTimer;
         function startGameTimer() {
             let timeLeft = gameData.roundDuration;
             updateTimerDisplay(timeLeft);
             
-            gameTimerInterval = setInterval(() => {
+            gameTimer = setInterval(() => {
                 timeLeft--;
                 updateTimerDisplay(timeLeft);
                 
                 if (timeLeft <= 0) {
-                    clearInterval(gameTimerInterval);
+                    clearInterval(gameTimer);
                     startVoting();
                 }
             }, 1000);
         }
-
+        
         function updateTimerDisplay(seconds) {
             const minutes = Math.floor(seconds / 60);
             const secs = seconds % 60;
             document.getElementById('gameTimer').textContent = 
                 `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            
+            // Change color when time is running out
+            if (seconds <= 30) {
+                document.getElementById('gameTimer').style.color = 'var(--accent)';
+            } else if (seconds <= 60) {
+                document.getElementById('gameTimer').style.color = 'var(--warning)';
+            }
         }
-
+        
         function skipTurn() {
             if (confirm('Akhiri ronde diskusi sekarang?')) {
-                clearInterval(gameTimerInterval);
+                clearInterval(gameTimer);
                 startVoting();
             }
         }
-
+        
+        // Voting phase
         function startVoting() {
-            clearInterval(gameTimerInterval);
-            screens.game.classList.remove('active');
-            screens.voting.classList.add('active');
+            clearInterval(gameTimer);
+            changeScreen('screenGame', 'screenVoting');
             
             // Setup voting options
             const voteOptions = document.getElementById('voteOptions');
@@ -866,857 +1100,203 @@
             
             gameData.players.forEach(player => {
                 const div = document.createElement('div');
-                div.className = 'vote-option';
+                div.className = 'vote-item';
                 div.innerHTML = `
-                    <div style="font-weight: bold;">${player.name}</div>
-                    <div style="font-size: 0.9rem; opacity: 0.8;">
-                        ${gameData.revealedImpostors.includes(player.id) ? '⚡ Impostor (terungkap)' : ''}
+                    <div>
+                        <span style="font-weight: bold;">${player.name}</span>
+                        ${player.role === 'impostor' ? '<span class="impostor-badge">⚡</span>' : ''}
                     </div>
+                    <div style="opacity: 0.7;">Klik untuk vote</div>
                 `;
                 div.onclick = () => selectVote(player.id, div);
                 voteOptions.appendChild(div);
             });
             
-            // Reset vote state
+            // Reset voting state
             gameData.votes = {};
             document.getElementById('submitVoteBtn').disabled = true;
             document.getElementById('seeResultsBtn').style.display = 'none';
-            document.getElementById('votingInstruction').textContent = 
-                'Pilih siapa yang menurut Anda adalah Impostor:';
+            document.getElementById('votingProgress').textContent = 'Belum ada yang vote';
         }
-
-        let selectedVote = null;
+        
+        let selectedVoteId = null;
         function selectVote(playerId, element) {
-            // Remove selection from all options
-            document.querySelectorAll('.vote-option').forEach(opt => {
-                opt.classList.remove('selected');
+            // Remove selection from all
+            document.querySelectorAll('.vote-item').forEach(item => {
+                item.classList.remove('selected');
             });
             
-            // Select this option
+            // Select this one
             element.classList.add('selected');
-            selectedVote = playerId;
+            selectedVoteId = playerId;
             document.getElementById('submitVoteBtn').disabled = false;
         }
-
+        
         function submitVote() {
-            if (selectedVote) {
+            if (selectedVoteId) {
                 // Record vote
-                gameData.votes[selectedVote] = (gameData.votes[selectedVote] || 0) + 1;
+                gameData.votes[selectedVoteId] = (gameData.votes[selectedVoteId] || 0) + 1;
                 
                 // Update UI
-                document.getElementById('votingInstruction').textContent = 
-                    'Vote Anda telah direkam!';
+                document.getElementById('votingProgress').textContent = 'Vote Anda telah direkam!';
                 document.getElementById('submitVoteBtn').style.display = 'none';
                 document.getElementById('seeResultsBtn').style.display = 'block';
                 
-                // Check if all players have voted (simulated)
-                setTimeout(() => {
-                    showResults();
-                }, 2000);
+                // Auto-show results after delay
+                setTimeout(showResults, 2000);
             }
         }
-
-        function seeResults() {
-            showResults();
-        }
-
+        
+        // Show results
         function showResults() {
-            screens.voting.classList.remove('active');
-            screens.results.classList.add('active');
+            changeScreen('screenVoting', 'screenResults');
             
-            // Calculate results
-            const resultsContainer = document.getElementById('resultsContainer');
-            resultsContainer.innerHTML = '';
+            const resultsContent = document.getElementById('resultsContent');
+            resultsContent.innerHTML = '';
             
-            // Find most voted player
+            // Calculate voting results
             let maxVotes = 0;
             let votedOutPlayer = null;
+            let voteResults = [];
             
-            for (const playerId in gameData.votes) {
-                if (gameData.votes[playerId] > maxVotes) {
-                    maxVotes = gameData.votes[playerId];
-                    votedOutPlayer = gameData.players.find(p => p.id == playerId);
+            for (const [playerId, voteCount] of Object.entries(gameData.votes)) {
+                const player = gameData.players.find(p => p.id == playerId);
+                if (player) {
+                    voteResults.push({ player, voteCount });
+                    if (voteCount > maxVotes) {
+                        maxVotes = voteCount;
+                        votedOutPlayer = player;
+                    }
                 }
             }
             
+            // Sort by vote count
+            voteResults.sort((a, b) => b.voteCount - a.voteCount);
+            
+            // Display results
             if (votedOutPlayer) {
-                // Check if voted out player is imposter
-                const isImposter = gameData.impostors.includes(votedOutPlayer.id);
+                const isImpostor = votedOutPlayer.role === 'impostor';
                 
-                if (isImposter) {
-                    gameData.revealedImpostors.push(votedOutPlayer.id);
-                    resultsContainer.innerHTML = `
-                        <div style="text-align: center; margin: 20px 0;">
-                            <div style="font-size: 4rem; margin-bottom: 20px;">🎉</div>
-                            <h3 style="color: var(--success);">Impostor Terungkap!</h3>
-                            <p style="font-size: 1.2rem; margin: 10px 0;">${votedOutPlayer.name} adalah Impostor!</p>
-                            <p style="opacity: 0.8;">Warga menang!</p>
-                        </div>
+                // Result header
+                const resultHeader = document.createElement('div');
+                resultHeader.style.textAlign = 'center';
+                resultHeader.style.margin = '30px 0';
+                
+                if (isImpostor) {
+                    resultHeader.innerHTML = `
+                        <div style="font-size: 4rem; margin-bottom: 20px;">🎉</div>
+                        <h3 style="color: var(--success);">Impostor Terungkap!</h3>
+                        <p style="font-size: 1.3rem; margin: 10px 0;">
+                            ${votedOutPlayer.name} adalah <strong>Impostor</strong>!
+                        </p>
+                        <p style="opacity: 0.8;">Kata impostor: "${gameData.impostorWord}" (mirip dengan "${gameData.actualWord}")</p>
+                        <p style="color: var(--success); font-weight: bold; margin-top: 10px;">WARGA MENANG!</p>
                     `;
                 } else {
-                    resultsContainer.innerHTML = `
-                        <div style="text-align: center; margin: 20px 0;">
-                            <div style="font-size: 4rem; margin-bottom: 20px;">😞</div>
-                            <h3 style="color: var(--accent);">Salah Menebak!</h3>
-                            <p style="font-size: 1.2rem; margin: 10px 0;">${votedOutPlayer.name} adalah Warga, bukan Impostor!</p>
-                            <p style="opacity: 0.8;">Impostor masih bebas...</p>
-                        </div>
+                    resultHeader.innerHTML = `
+                        <div style="font-size: 4rem; margin-bottom: 20px;">😞</div>
+                        <h3 style="color: var(--accent);">Salah Menebak!</h3>
+                        <p style="font-size: 1.3rem; margin: 10px 0;">
+                            ${votedOutPlayer.name} adalah <strong>Warga</strong>, bukan Impostor!
+                        </p>
+                        <p style="opacity: 0.8;">Kata asli: "${gameData.actualWord}"</p>
+                        <p style="color: var(--accent); font-weight: bold; margin-top: 10px;">IMPOSTOR MASIH BEBAS!</p>
                     `;
                 }
                 
-                // Show voting results
-                const resultsDiv = document.createElement('div');
-                resultsDiv.style.marginTop = '30px';
-                resultsDiv.innerHTML = '<h3>Hasil Voting:</h3>';
-                
-                gameData.players.forEach(player => {
-                    const voteCount = gameData.votes[player.id] || 0;
-                    const div = document.createElement('div');
-                    div.className = 'result-item';
-                    div.innerHTML = `
-                        <div>
-                            <span style="font-weight: bold;">${player.name}</span>
-                            <span style="margin-left: 10px; font-size: 0.9rem; opacity: 0.8;">
-                                ${player.role === 'impostor' ? '⚡ Impostor' : '🛡️ Warga'}
-                            </span>
-                        </div>
-                        <div class="vote-count">${voteCount} votes</div>
-                    `;
-                    resultsDiv.appendChild(div);
-                });
-                
-                resultsContainer.appendChild(resultsDiv);
-                
-                // Show remaining impostors
-                const remainingImpostors = gameData.impostors.filter(id => 
-                    !gameData.revealedImpostors.includes(id)
-                );
-                
-                if (remainingImpostors.length > 0) {
-                    const impostorsDiv = document.createElement('div');
-                    impostorsDiv.style.marginTop = '20px';
-                    impostorsDiv.innerHTML = `
-                        <p style="opacity: 0.8;">Impostor yang masih tersembunyi: ${remainingImpostors.length}</p>
-                    `;
-                    resultsContainer.appendChild(impostorsDiv);
-                }
-            } else {
-                resultsContainer.innerHTML = `
-                    <div style="text-align: center; margin: 20px 0;">
-                        <div style="font-size: 4rem; margin-bottom: 20px;">🤔</div>
-                        <h3>Tidak Ada Voting</h3>
-                        <p>Tidak ada yang divote keluar...</p>
-                    </div>
-                `;
+                resultsContent.appendChild(resultHeader);
             }
             
-            // Show actual word
-            resultsContainer.innerHTML += `
-                <div style="margin-top: 30px; padding: 20px; background: rgba(255,255,255,0.1); border-radius: 10px;">
-                    <h4>Kata Rahasia:</h4>
-                    <p style="font-size: 1.5rem; font-weight: bold; margin: 10px 0;">${gameData.currentWord}</p>
-                    <p style="opacity: 0.8;">Kategori: ${gameData.currentCategory}</p>
+            // Voting results table
+            const resultsTable = document.createElement('div');
+            resultsTable.innerHTML = '<h3><i class="fas fa-chart-bar"></i> Hasil Voting:</h3>';
+            
+            voteResults.forEach(result => {
+                const div = document.createElement('div');
+                div.className = 'result-item';
+                
+                const roleBadge = result.player.role === 'impostor'
+                    ? '<span class="impostor-badge">⚡ Impostor</span>'
+                    : '<span class="citizen-badge">🛡️ Warga</span>';
+                
+                div.innerHTML = `
+                    <div>
+                        <span style="font-weight: bold;">${result.player.name}</span>
+                        ${roleBadge}
+                    </div>
+                    <div class="vote-count">${result.voteCount} votes</div>
+                `;
+                resultsTable.appendChild(div);
+            });
+            
+            resultsContent.appendChild(resultsTable);
+            
+            // Show actual game info
+            const gameInfo = document.createElement('div');
+            gameInfo.style.marginTop = '30px';
+            gameInfo.innerHTML = `
+                <div class="game-info">
+                    <h3><i class="fas fa-info-circle"></i> Info Game:</h3>
+                    <p><strong>Kategori:</strong> ${gameData.currentCategory}</p>
+                    <p><strong>Kata asli (Warga):</strong> ${gameData.actualWord}</p>
+                    <p><strong>Kata impostor:</strong> ${gameData.impostorWord} <span class="similarity-indicator high-similarity">(mirip)</span></p>
+                    <p><strong>Impostor:</strong> ${gameData.players.filter(p => p.role === 'impostor').map(p => p.name).join(', ')}</p>
                 </div>
             `;
+            resultsContent.appendChild(gameInfo);
         }
-
+        
+        // Play again
         function playAgain() {
-            // Keep players, reset game state
+            // Keep players, reset other data
             gameData.selectedCategories = [];
             gameData.impostors = [];
             gameData.currentCategory = "";
-            gameData.currentWord = "";
+            gameData.actualWord = "";
+            gameData.impostorWord = "";
             gameData.currentPlayerIndex = 0;
             gameData.votes = {};
-            gameData.revealedImpostors = [];
             
             // Reset UI
-            document.querySelectorAll('.category').forEach(cat => {
-                cat.classList.remove('selected');
+            document.querySelectorAll('.category-item').forEach(item => {
+                item.classList.remove('selected');
             });
-            document.getElementById('categoriesProgress').textContent = '0 kategori terpilih';
-            document.getElementById('nextToSettings').disabled = true;
+            document.getElementById('categoryProgress').textContent = '0 kategori terpilih';
+            document.getElementById('categoriesNextBtn').disabled = true;
             
-            // Go to categories screen
-            screens.results.classList.remove('active');
-            screens.categories.classList.add('active');
+            // Go to categories
+            changeScreen('screenResults', 'screenCategories');
         }
-
+        
+        // Reset game completely
         function resetGame() {
-            // Reset everything
+            // Reset all data
             gameData.players = [];
             gameData.selectedCategories = [];
             gameData.impostors = [];
             gameData.currentCategory = "";
-            gameData.currentWord = "";
+            gameData.actualWord = "";
+            gameData.impostorWord = "";
             gameData.currentPlayerIndex = 0;
             gameData.votes = {};
-            gameData.revealedImpostors = [];
             
             // Reset UI
             document.getElementById('playerInput').value = '';
             updatePlayerList();
-            checkStartButton();
+            checkNextButton();
             
-            document.querySelectorAll('.category').forEach(cat => {
-                cat.classList.remove('selected');
+            document.querySelectorAll('.category-item').forEach(item => {
+                item.classList.remove('selected');
             });
-            document.getElementById('categoriesProgress').textContent = '0 kategori terpilih';
-            document.getElementById('nextToSettings').disabled = true;
+            document.getElementById('categoryProgress').textContent = '0 kategori terpilih';
+            document.getElementById('categoriesNextBtn').disabled = true;
             
             // Go to players screen
-            screens.results.classList.remove('active');
-            screens.players.classList.add('active');
+            changeScreen('screenResults', 'screenPlayers');
         }
-
-        // Share game function
-        function shareGame() {
-            const playerNames = gameData.players.map(p => p.name).join(',');
-            const url = `${window.location.origin}${window.location.pathname}?players=${encodeURIComponent(playerNames)}`;
-            
-            if (navigator.share) {
-                navigator.share({
-                    title: 'GameImpostor',
-                    text: 'Main GameImpostor bersama saya!',
-                    url: url
-                });
-            } else {
-                // Fallback for browsers without Web Share API
-                navigator.clipboard.writeText(url).then(() => {
-                    alert('Link game telah disalin ke clipboard! Bagikan ke teman Anda.');
-                });
-            }
-        }
-
-        // Initialize game when page loads
+        
+        // Initialize when page loads
         window.onload = initGame;
     </script>
 </body>
-</html>        
-        .card:hover {
-            transform: translateY(-5px);
-        }
-        
-        .card-title {
-            font-size: 1.8rem;
-            margin-bottom: 20px;
-            color: white;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .card-title i {
-            color: var(--warning);
-        }
-        
-        /* Features Section */
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin: 30px 0;
-        }
-        
-        .feature {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-        
-        .feature:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: scale(1.05);
-        }
-        
-        .feature-icon {
-            font-size: 2.5rem;
-            margin-bottom: 15px;
-            display: block;
-        }
-        
-        .feature-title {
-            font-size: 1.2rem;
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: var(--warning);
-        }
-        
-        /* Categories */
-        .categories-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 15px;
-            margin: 20px 0;
-        }
-        
-        .category {
-            background: rgba(255, 255, 255, 0.08);
-            padding: 15px;
-            border-radius: 12px;
-            text-align: center;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        
-        .category:hover {
-            background: rgba(255, 255, 255, 0.15);
-            transform: translateY(-3px);
-        }
-        
-        .category-name {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        
-        .category-count {
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.7);
-        }
-        
-        /* Game Flow */
-        .game-flow {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 20px;
-            margin: 30px 0;
-        }
-        
-        .flow-step {
-            background: rgba(255, 255, 255, 0.1);
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
-        
-        .flow-step:not(:last-child)::after {
-            content: "→";
-            position: absolute;
-            right: -25px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 1.5rem;
-            color: rgba(255, 255, 255, 0.5);
-        }
-        
-        @media (max-width: 768px) {
-            .flow-step:not(:last-child)::after {
-                content: "↓";
-                right: 50%;
-                top: 100%;
-                transform: translateX(50%);
-            }
-            
-            .game-flow {
-                flex-direction: column;
-                align-items: center;
-            }
-        }
-        
-        .step-number {
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: var(--warning);
-        }
-        
-        .step-text {
-            font-size: 0.8rem;
-            margin-top: 5px;
-            text-align: center;
-        }
-        
-        /* Code Blocks */
-        .code-block {
-            background: rgba(0, 0, 0, 0.3);
-            padding: 20px;
-            border-radius: 15px;
-            font-family: 'Courier New', monospace;
-            margin: 20px 0;
-            overflow-x: auto;
-            border-left: 4px solid var(--warning);
-        }
-        
-        .code-block code {
-            color: #FFD166;
-            line-height: 1.5;
-        }
-        
-        /* Buttons */
-        .buttons {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin: 30px 0;
-        }
-        
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            padding: 15px 30px;
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            border: none;
-            cursor: pointer;
-            font-size: 1rem;
-        }
-        
-        .btn-primary {
-            background: var(--secondary);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background: #5A52D5;
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(108, 99, 255, 0.4);
-        }
-        
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-        }
-        
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: scale(1.05);
-        }
-        
-        .btn-accent {
-            background: var(--accent);
-            color: white;
-        }
-        
-        .btn-accent:hover {
-            background: #E05555;
-            transform: scale(1.05);
-        }
-        
-        /* Footer */
-        .footer {
-            text-align: center;
-            margin-top: 50px;
-            padding-top: 30px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.9rem;
-        }
-        
-        .tech-stack {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin: 20px 0;
-            flex-wrap: wrap;
-        }
-        
-        .tech-icon {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 10px 20px;
-            border-radius: 50px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 2.2rem;
-            }
-            
-            .logo {
-                font-size: 3rem;
-            }
-            
-            .card {
-                padding: 20px;
-            }
-            
-            .card-title {
-                font-size: 1.5rem;
-            }
-        }
-        
-        /* Demo Screenshot */
-        .demo-screenshot {
-            width: 100%;
-            max-width: 300px;
-            border-radius: 15px;
-            margin: 20px auto;
-            display: block;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-            border: 3px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        /* Word Examples */
-        .word-examples {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin: 15px 0;
-        }
-        
-        .word-badge {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <!-- Header -->
-        <header class="header">
-            <div class="logo">🎮</div>
-            <h1>GameImpostor</h1>
-            <div class="subtitle">Tebak Kata dengan Impostor - Game Mobile Seru!</div>
-            <div class="tagline">⚡ Minimal 3 Pemain • Random Impostor • Voting System</div>
-        </header>
-        
-        <!-- Main Content -->
-        <div class="content-grid">
-            <!-- Left Column -->
-            <div>
-                <!-- About the Game -->
-                <div class="card">
-                    <h2 class="card-title"><i class="fas fa-gamepad"></i> Tentang Game</h2>
-                    <p><strong>GameImpostor</strong> adalah game tebak kata dengan twist unik! Beberapa pemain menjadi <strong>Impostor</strong> yang harus menipu pemain lain tanpa ketahuan.</p>
-                    
-                    <div class="features">
-                        <div class="feature">
-                            <span class="feature-icon">👥</span>
-                            <div class="feature-title">Multiplayer</div>
-                            <p>3+ pemain, main bersama teman di satu perangkat</p>
-                        </div>
-                        <div class="feature">
-                            <span class="feature-icon">🎲</span>
-                            <div class="feature-title">Random Roles</div>
-                            <p>Impostor dipilih secara acak setiap game</p>
-                        </div>
-                        <div class="feature">
-                            <span class="feature-icon">🗣️</span>
-                            <div class="feature-title">Diskusi & Voting</div>
-                            <p>Diskusikan dan voting untuk cari impostor</p>
-                        </div>
-                        <div class="feature">
-                            <span class="feature-icon">⏱️</span>
-                            <div class="feature-title">Timer</div>
-                            <p>Batas waktu untuk setiap ronde</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- How to Play -->
-                <div class="card">
-                    <h2 class="card-title"><i class="fas fa-play-circle"></i> Cara Bermain</h2>
-                    
-                    <div class="game-flow">
-                        <div class="flow-step">
-                            <div class="step-number">1</div>
-                            <div class="step-text">Tambah Pemain</div>
-                        </div>
-                        <div class="flow-step">
-                            <div class="step-number">2</div>
-                            <div class="step-text">Pilih Kategori</div>
-                        </div>
-                        <div class="flow-step">
-                            <div class="step-number">3</div>
-                            <div class="step-text">Pengaturan Game</div>
-                        </div>
-                        <div class="flow-step">
-                            <div class="step-number">4</div>
-                            <div class="step-text">Reveal Role</div>
-                        </div>
-                        <div class="flow-step">
-                            <div class="step-number">5</div>
-                            <div class="step-text">Main & Voting</div>
-                        </div>
-                    </div>
-                    
-                    <ol style="padding-left: 20px; margin-top: 20px;">
-                        <li style="margin-bottom: 10px;">Tambahkan minimal 3 nama pemain</li>
-                        <li style="margin-bottom: 10px;">Pilih kategori kata yang ingin dimainkan</li>
-                        <li style="margin-bottom: 10px;">Atur jumlah impostor dan durasi permainan</li>
-                        <li style="margin-bottom: 10px;">Setiap pemain swipe untuk melihat role (kata atau "IMPOSTOR")</li>
-                        <li style="margin-bottom: 10px;">Diskusikan dan tebak siapa impostor-nya!</li>
-                    </ol>
-                </div>
-                
-                <!-- Categories -->
-                <div class="card">
-                    <h2 class="card-title"><i class="fas fa-th-list"></i> Kategori Kata</h2>
-                    <p>Lebih dari <strong>15 kategori</strong> dengan minimal <strong>30 kata unik</strong> setiap kategori:</p>
-                    
-                    <div class="categories-grid">
-                        <div class="category">
-                            <div class="category-name">🎉 Waktu Pesta</div>
-                            <div class="category-count">35 kata</div>
-                        </div>
-                        <div class="category">
-                            <div class="category-name">🌟 Selebriti</div>
-                            <div class="category-count">40 kata</div>
-                        </div>
-                        <div class="category">
-                            <div class="category-name">🍕 Makanan</div>
-                            <div class="category-count">45 kata</div>
-                        </div>
-                        <div class="category">
-                            <div class="category-name">🎬 Hollywood</div>
-                            <div class="category-count">38 kata</div>
-                        </div>
-                        <div class="category">
-                            <div class="category-name">🏷️ Merek</div>
-                            <div class="category-count">42 kata</div>
-                        </div>
-                        <div class="category">
-                            <div class="category-name">🗺️ Tempat</div>
-                            <div class="category-count">50 kata</div>
-                        </div>
-                        <div class="category">
-                            <div class="category-name">🐾 Hewan</div>
-                            <div class="category-count">36 kata</div>
-                        </div>
-                        <div class="category">
-                            <div class="category-name">⚽ Olahraga</div>
-                            <div class="category-count">32 kata</div>
-                        </div>
-                    </div>
-                    
-                    <div class="word-examples">
-                        <div class="word-badge">Pizza</div>
-                        <div class="word-badge">Beyoncé</div>
-                        <div class="word-badge">Menara Eiffel</div>
-                        <div class="word-badge">Avengers</div>
-                        <div class="word-badge">Nike</div>
-                        <div class="word-badge">Harimau</div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Right Column -->
-            <div>
-                <!-- Game Features -->
-                <div class="card">
-                    <h2 class="card-title"><i class="fas fa-star"></i> Fitur Unggulan</h2>
-                    
-                    <h3 style="margin: 20px 0 10px 0; color: var(--warning);">🎯 Swipe to Reveal</h3>
-                    <p>Swipe ke atas untuk melihat kata rahasia. Jika Anda impostor, yang muncul adalah "<strong>IMPOSTOR</strong>" dengan petunjuk kategori.</p>
-                    
-                    <h3 style="margin: 20px 0 10px 0; color: var(--warning);">🕵️ Sistem Impostor Cerdas</h3>
-                    <p>Impostor tetap mendapatkan kata yang <strong>sangat mirip</strong> dengan kata asli untuk membantu mereka berbaur!</p>
-                    
-                    <h3 style="margin: 20px 0 10px 0; color: var(--warning);">📱 Voting Bergilir</h3>
-                    <p>HP akan digilir ke setiap peserta untuk melakukan voting. Lihat hasil voting dengan grafik yang interaktif!</p>
-                    
-                    <h3 style="margin: 20px 0 10px 0; color: var(--warning);">⚙️ Pengaturan Fleksibel</h3>
-                    <ul style="padding-left: 20px; margin-top: 10px;">
-                        <li style="margin-bottom: 8px;">Pilih jumlah impostor (1-3)</li>
-                        <li style="margin-bottom: 8px;">Aktif/nonaktif petunjuk untuk impostor</li>
-                        <li style="margin-bottom: 8px;">Atur durasi ronde (1-5 menit)</li>
-                        <li style="margin-bottom: 8px;">Pilih kategori favorit</li>
-                    </ul>
-                </div>
-                
-                <!-- How to Run -->
-                <div class="card">
-                    <h2 class="card-title"><i class="fas fa-terminal"></i> Cara Menjalankan</h2>
-                    <p>Aplikasi ini dibangun dengan <strong>React Native</strong> dan <strong>Expo</strong>. Untuk menjalankannya:</p>
-                    
-                    <div class="code-block">
-                        <code>
-# Clone repository<br>
-git clone https://github.com/username/GameImpostor.git<br><br>
-                            
-# Masuk ke folder proyek<br>
-cd GameImpostor<br><br>
-                            
-# Install dependencies<br>
-npm install<br><br>
-                            
-# Jalankan aplikasi<br>
-npx expo start<br><br>
-                            
-# Scan QR code dengan Expo Go di smartphone
-                        </code>
-                    </div>
-                    
-                    <p style="margin-top: 15px;">Atau build untuk production:</p>
-                    <div class="code-block">
-                        <code>
-# Build untuk Android<br>
-npx expo run:android<br><br>
-                            
-# Build untuk iOS (hanya di Mac)<br>
-npx expo run:ios
-                        </code>
-                    </div>
-                </div>
-                
-                <!-- Screenshots Demo -->
-                <div class="card">
-                    <h2 class="card-title"><i class="fas fa-mobile-alt"></i> Tampilan Game</h2>
-                    
-                    <div style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin: 20px 0;">
-                        <div style="text-align: center;">
-                            <div style="width: 120px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 20px; margin: 0 auto 10px; display: flex; flex-direction: column; justify-content: center; padding: 15px;">
-                                <div style="font-size: 0.8rem; margin-bottom: 10px;">06.02</div>
-                                <div style="font-weight: bold; margin-bottom: 15px;">Players</div>
-                                <div style="background: rgba(255,255,255,0.2); padding: 8px; border-radius: 5px; margin: 5px 0;">Ray</div>
-                                <div style="background: rgba(255,255,255,0.2); padding: 8px; border-radius: 5px; margin: 5px 0;">Je</div>
-                                <div style="background: rgba(255,255,255,0.1); padding: 8px; border-radius: 5px; margin: 5px 0; color: rgba(255,255,255,0.5);">Enter player name</div>
-                            </div>
-                            <div style="font-size: 0.9rem;">Tambah Pemain</div>
-                        </div>
-                        
-                        <div style="text-align: center;">
-                            <div style="width: 120px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 20px; margin: 0 auto 10px; display: flex; flex-direction: column; justify-content: center; padding: 15px;">
-                                <div style="font-size: 0.8rem; margin-bottom: 10px;">06.03</div>
-                                <div style="font-weight: bold; margin-bottom: 15px;">Categories</div>
-                                <div style="background: rgba(108, 99, 255, 0.3); padding: 8px; border-radius: 5px; margin: 5px 0; font-size: 0.9rem;">🎉 Party Time</div>
-                                <div style="background: rgba(255,255,255,0.1); padding: 8px; border-radius: 5px; margin: 5px 0; font-size: 0.9rem;">🌟 Celebrities</div>
-                                <div style="background: rgba(255,255,255,0.1); padding: 8px; border-radius: 5px; margin: 5px 0; font-size: 0.9rem;">🍕 Food</div>
-                            </div>
-                            <div style="font-size: 0.9rem;">Pilih Kategori</div>
-                        </div>
-                        
-                        <div style="text-align: center;">
-                            <div style="width: 120px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 20px; margin: 0 auto 10px; display: flex; flex-direction: column; justify-content: center; padding: 15px; align-items: center;">
-                                <div style="font-size: 1.5rem; margin-bottom: 20px;">👤 Ray</div>
-                                <div style="text-align: center; font-size: 0.9rem; margin-bottom: 15px; color: rgba(255,255,255,0.7);">Swipe up to reveal the secret word</div>
-                                <div style="font-size: 2rem;">↑</div>
-                            </div>
-                            <div style="font-size: 0.9rem;">Swipe to Reveal</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Action Buttons -->
-        <div style="text-align: center; margin: 40px 0;">
-            <div class="buttons">
-                <a href="https://github.com/username/GameImpostor" class="btn btn-primary" target="_blank">
-                    <i class="fab fa-github"></i> Lihat Kode di GitHub
-                </a>
-                <a href="#demo" class="btn btn-secondary">
-                    <i class="fas fa-play"></i> Coba Demo
-                </a>
-                <a href="#download" class="btn btn-accent">
-                    <i class="fas fa-download"></i> Download APK
-                </a>
-            </div>
-        </div>
-        
-        <!-- Tech Stack -->
-        <div class="card">
-            <h2 class="card-title"><i class="fas fa-code"></i> Teknologi</h2>
-            <div class="tech-stack">
-                <div class="tech-icon">
-                    <i class="fab fa-react" style="color: #61DAFB;"></i>
-                    <span>React Native</span>
-                </div>
-                <div class="tech-icon">
-                    <i class="fas fa-mobile-alt" style="color: #6C63FF;"></i>
-                    <span>Expo</span>
-                </div>
-                <div class="tech-icon">
-                    <i class="fab fa-js-square" style="color: #FFD166;"></i>
-                    <span>JavaScript</span>
-                </div>
-                <div class="tech-icon">
-                    <i class="fas fa-paint-brush" style="color: #FF6B6B;"></i>
-                    <span>Custom UI</span>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Footer -->
-        <footer class="footer">
-            <p>🎮 <strong>GameImpostor</strong> - Game tebak kata dengan impostor yang seru dan menantang!</p>
-            <p style="margin-top: 10px;">Dikembangkan dengan ❤️ untuk hiburan bersama teman dan keluarga.</p>
-            <p style="margin-top: 20px; font-size: 0.8rem; color: rgba(255, 255, 255, 0.5);">
-                &copy; 2024 GameImpostor. Semua hak cipta dilindungi undang-undang.
-            </p>
-        </footer>
-    </div>
-    
-    <script>
-        // Simple animations and interactions
-        document.addEventListener('DOMContentLoaded', function() {
-            // Animate features on scroll
-            const observerOptions = {
-                threshold: 0.1,
-                rootMargin: '0px 0px -50px 0px'
-            };
-            
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.style.opacity = '1';
-                        entry.target.style.transform = 'translateY(0)';
-                    }
-                });
-            }, observerOptions);
-            
-            // Animate cards
-            document.querySelectorAll('.card').forEach(card => {
-                card.style.opacity = '0';
-                card.style.transform = 'translateY(20px)';
-                card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-                observer.observe(card);
-            });
-            
-            // Animate features
-            document.querySelectorAll('.feature').forEach((feature, index) => {
-                feature.style.opacity = '0';
-                feature.style.transform = 'translateY(20px)';
-                feature.style.transition = `opacity 0.5s ease ${index * 0.1}s, transform 0.5s ease ${index * 0.1}s`;
-                observer.observe(feature);
-            });
-            
-            // Demo button interaction
-            const demoBtn = document.querySelector('a[href="#demo"]');
-            if (demoBtn) {
-                demoBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    alert('🚀 Demo akan segera hadir! Untuk sekarang, Anda bisa clone repository dan jalankan dengan Expo.');
-                });
-            }
-            
-            // Download button interaction
-            const downloadBtn = document.querySelector('a[href="#download"]');
-            if (downloadBtn) {
-                downloadBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    alert('📱 APK akan tersedia setelah build production. Jalankan: npx expo run:android');
-                });
-            }
-            
-            // Category hover effect
-            document.querySelectorAll('.category').forEach(category => {
-                category.addEventListener('mouseenter', function() {
-                    this.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.2)';
-                });
-                
-                category.addEventListener('mouseleave', function() {
-                    this.style.boxShadow = 'none';
-                });
-            });
-        });
-    </script>
-</body>
-    </html>
+                                                  </html>
