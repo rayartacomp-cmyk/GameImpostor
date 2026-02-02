@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GameImpostor</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #4A306D 0%, #6C63FF 100%);
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .box {
+            background: rgba(255,255,255,0.1);
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 600px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        h1 {
+            font-size: 3rem;
+            margin: 0 0 20px 0;
+        }
+        .feature {
+            background: rgba(255,255,255,0.15);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+        }
+        code {
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 5px;
+            display: block;
+            margin: 10px 0;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h1>🎮 GameImpostor</h1>
+        <p style="font-size: 1.2rem;">Tebak Kata dengan Impostor</p>
+        
+        <div class="feature">👥 Multiplayer (3+ pemain)</div>
+        <div class="feature">🕵️ Random imposter system</div>
+        <div class="feature">🗣️ Diskusi & voting</div>
+        <div class="feature">⏱️ Timer per round</div>
+        
+        <div style="margin-top: 30px;">
+            <h3>🚀 Cara Menjalankan:</h3>
+            <code>git clone [repository-url]</code>
+            <code>cd GameImpostor</code>
+            <code>npm install</code>
+            <code>npx expo start</code>
+            <p style="margin-top: 10px;">Scan QR code dengan Expo Go app</p>
+        </div>
+    </div>
+</body>
+</html>
