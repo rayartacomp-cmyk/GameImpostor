@@ -1,68 +1,741 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-    <title>GameImpostor</title>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameImpostor - Tebak Kata dengan Impostor</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #4A306D 0%, #6C63FF 100%);
-            color: white;
-            text-align: center;
-            padding: 40px 20px;
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary: #4A306D;
+            --secondary: #6C63FF;
+            --accent: #FF6B6B;
+            --success: #06D6A0;
+            --warning: #FFD166;
+            --dark: #2D3047;
+            --light: #F8F9FA;
+            --gray: #6C757D;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
             min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .logo {
+            font-size: 4rem;
+            margin-bottom: 15px;
+            display: inline-block;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #FF6B6B, #4ECDC4, #6C63FF);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 20px;
+        }
+        
+        .tagline {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        /* Main Content */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        @media (min-width: 992px) {
+            .content-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-title {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card-title i {
+            color: var(--warning);
+        }
+        
+        /* Features Section */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .feature {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .feature:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.05);
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+        
+        .feature-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--warning);
+        }
+        
+        /* Categories */
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .category {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .category:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-3px);
+        }
+        
+        .category-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .category-count {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        /* Game Flow */
+        .game-flow {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .flow-step {
+            background: rgba(255, 255, 255, 0.1);
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            position: relative;
         }
-        .box {
-            background: rgba(255,255,255,0.1);
-            padding: 40px;
-            border-radius: 20px;
-            max-width: 600px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2);
+        
+        .flow-step:not(:last-child)::after {
+            content: "→";
+            position: absolute;
+            right: -25px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.5rem;
+            color: rgba(255, 255, 255, 0.5);
         }
-        h1 {
-            font-size: 3rem;
-            margin: 0 0 20px 0;
+        
+        @media (max-width: 768px) {
+            .flow-step:not(:last-child)::after {
+                content: "↓";
+                right: 50%;
+                top: 100%;
+                transform: translateX(50%);
+            }
+            
+            .game-flow {
+                flex-direction: column;
+                align-items: center;
+            }
         }
-        .feature {
-            background: rgba(255,255,255,0.15);
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 10px;
+        
+        .step-number {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--warning);
         }
-        code {
-            background: rgba(0,0,0,0.3);
-            padding: 10px;
-            border-radius: 5px;
+        
+        .step-text {
+            font-size: 0.8rem;
+            margin-top: 5px;
+            text-align: center;
+        }
+        
+        /* Code Blocks */
+        .code-block {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 15px;
+            font-family: 'Courier New', monospace;
+            margin: 20px 0;
+            overflow-x: auto;
+            border-left: 4px solid var(--warning);
+        }
+        
+        .code-block code {
+            color: #FFD166;
+            line-height: 1.5;
+        }
+        
+        /* Buttons */
+        .buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        .btn-primary {
+            background: var(--secondary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5A52D5;
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(108, 99, 255, 0.4);
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+        
+        .btn-accent {
+            background: var(--accent);
+            color: white;
+        }
+        
+        .btn-accent:hover {
+            background: #E05555;
+            transform: scale(1.05);
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+        
+        .tech-stack {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .tech-icon {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .logo {
+                font-size: 3rem;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+            
+            .card-title {
+                font-size: 1.5rem;
+            }
+        }
+        
+        /* Demo Screenshot */
+        .demo-screenshot {
+            width: 100%;
+            max-width: 300px;
+            border-radius: 15px;
+            margin: 20px auto;
             display: block;
-            margin: 10px 0;
-            font-family: monospace;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            border: 3px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Word Examples */
+        .word-examples {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .word-badge {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
         }
     </style>
 </head>
 <body>
-    <div class="box">
-        <h1>🎮 GameImpostor</h1>
-        <p style="font-size: 1.2rem;">Tebak Kata dengan Impostor</p>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">🎮</div>
+            <h1>GameImpostor</h1>
+            <div class="subtitle">Tebak Kata dengan Impostor - Game Mobile Seru!</div>
+            <div class="tagline">⚡ Minimal 3 Pemain • Random Impostor • Voting System</div>
+        </header>
         
-        <div class="feature">👥 Multiplayer (3+ pemain)</div>
-        <div class="feature">🕵️ Random imposter system</div>
-        <div class="feature">🗣️ Diskusi & voting</div>
-        <div class="feature">⏱️ Timer per round</div>
-        
-        <div style="margin-top: 30px;">
-            <h3>🚀 Cara Menjalankan:</h3>
-            <code>git clone [repository-url]</code>
-            <code>cd GameImpostor</code>
-            <code>npm install</code>
-            <code>npx expo start</code>
-            <p style="margin-top: 10px;">Scan QR code dengan Expo Go app</p>
+        <!-- Main Content -->
+        <div class="content-grid">
+            <!-- Left Column -->
+            <div>
+                <!-- About the Game -->
+                <div class="card">
+                    <h2 class="card-title"><i class="fas fa-gamepad"></i> Tentang Game</h2>
+                    <p><strong>GameImpostor</strong> adalah game tebak kata dengan twist unik! Beberapa pemain menjadi <strong>Impostor</strong> yang harus menipu pemain lain tanpa ketahuan.</p>
+                    
+                    <div class="features">
+                        <div class="feature">
+                            <span class="feature-icon">👥</span>
+                            <div class="feature-title">Multiplayer</div>
+                            <p>3+ pemain, main bersama teman di satu perangkat</p>
+                        </div>
+                        <div class="feature">
+                            <span class="feature-icon">🎲</span>
+                            <div class="feature-title">Random Roles</div>
+                            <p>Impostor dipilih secara acak setiap game</p>
+                        </div>
+                        <div class="feature">
+                            <span class="feature-icon">🗣️</span>
+                            <div class="feature-title">Diskusi & Voting</div>
+                            <p>Diskusikan dan voting untuk cari impostor</p>
+                        </div>
+                        <div class="feature">
+                            <span class="feature-icon">⏱️</span>
+                            <div class="feature-title">Timer</div>
+                            <p>Batas waktu untuk setiap ronde</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- How to Play -->
+                <div class="card">
+                    <h2 class="card-title"><i class="fas fa-play-circle"></i> Cara Bermain</h2>
+                    
+                    <div class="game-flow">
+                        <div class="flow-step">
+                            <div class="step-number">1</div>
+                            <div class="step-text">Tambah Pemain</div>
+                        </div>
+                        <div class="flow-step">
+                            <div class="step-number">2</div>
+                            <div class="step-text">Pilih Kategori</div>
+                        </div>
+                        <div class="flow-step">
+                            <div class="step-number">3</div>
+                            <div class="step-text">Pengaturan Game</div>
+                        </div>
+                        <div class="flow-step">
+                            <div class="step-number">4</div>
+                            <div class="step-text">Reveal Role</div>
+                        </div>
+                        <div class="flow-step">
+                            <div class="step-number">5</div>
+                            <div class="step-text">Main & Voting</div>
+                        </div>
+                    </div>
+                    
+                    <ol style="padding-left: 20px; margin-top: 20px;">
+                        <li style="margin-bottom: 10px;">Tambahkan minimal 3 nama pemain</li>
+                        <li style="margin-bottom: 10px;">Pilih kategori kata yang ingin dimainkan</li>
+                        <li style="margin-bottom: 10px;">Atur jumlah impostor dan durasi permainan</li>
+                        <li style="margin-bottom: 10px;">Setiap pemain swipe untuk melihat role (kata atau "IMPOSTOR")</li>
+                        <li style="margin-bottom: 10px;">Diskusikan dan tebak siapa impostor-nya!</li>
+                    </ol>
+                </div>
+                
+                <!-- Categories -->
+                <div class="card">
+                    <h2 class="card-title"><i class="fas fa-th-list"></i> Kategori Kata</h2>
+                    <p>Lebih dari <strong>15 kategori</strong> dengan minimal <strong>30 kata unik</strong> setiap kategori:</p>
+                    
+                    <div class="categories-grid">
+                        <div class="category">
+                            <div class="category-name">🎉 Waktu Pesta</div>
+                            <div class="category-count">35 kata</div>
+                        </div>
+                        <div class="category">
+                            <div class="category-name">🌟 Selebriti</div>
+                            <div class="category-count">40 kata</div>
+                        </div>
+                        <div class="category">
+                            <div class="category-name">🍕 Makanan</div>
+                            <div class="category-count">45 kata</div>
+                        </div>
+                        <div class="category">
+                            <div class="category-name">🎬 Hollywood</div>
+                            <div class="category-count">38 kata</div>
+                        </div>
+                        <div class="category">
+                            <div class="category-name">🏷️ Merek</div>
+                            <div class="category-count">42 kata</div>
+                        </div>
+                        <div class="category">
+                            <div class="category-name">🗺️ Tempat</div>
+                            <div class="category-count">50 kata</div>
+                        </div>
+                        <div class="category">
+                            <div class="category-name">🐾 Hewan</div>
+                            <div class="category-count">36 kata</div>
+                        </div>
+                        <div class="category">
+                            <div class="category-name">⚽ Olahraga</div>
+                            <div class="category-count">32 kata</div>
+                        </div>
+                    </div>
+                    
+                    <div class="word-examples">
+                        <div class="word-badge">Pizza</div>
+                        <div class="word-badge">Beyoncé</div>
+                        <div class="word-badge">Menara Eiffel</div>
+                        <div class="word-badge">Avengers</div>
+                        <div class="word-badge">Nike</div>
+                        <div class="word-badge">Harimau</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Column -->
+            <div>
+                <!-- Game Features -->
+                <div class="card">
+                    <h2 class="card-title"><i class="fas fa-star"></i> Fitur Unggulan</h2>
+                    
+                    <h3 style="margin: 20px 0 10px 0; color: var(--warning);">🎯 Swipe to Reveal</h3>
+                    <p>Swipe ke atas untuk melihat kata rahasia. Jika Anda impostor, yang muncul adalah "<strong>IMPOSTOR</strong>" dengan petunjuk kategori.</p>
+                    
+                    <h3 style="margin: 20px 0 10px 0; color: var(--warning);">🕵️ Sistem Impostor Cerdas</h3>
+                    <p>Impostor tetap mendapatkan kata yang <strong>sangat mirip</strong> dengan kata asli untuk membantu mereka berbaur!</p>
+                    
+                    <h3 style="margin: 20px 0 10px 0; color: var(--warning);">📱 Voting Bergilir</h3>
+                    <p>HP akan digilir ke setiap peserta untuk melakukan voting. Lihat hasil voting dengan grafik yang interaktif!</p>
+                    
+                    <h3 style="margin: 20px 0 10px 0; color: var(--warning);">⚙️ Pengaturan Fleksibel</h3>
+                    <ul style="padding-left: 20px; margin-top: 10px;">
+                        <li style="margin-bottom: 8px;">Pilih jumlah impostor (1-3)</li>
+                        <li style="margin-bottom: 8px;">Aktif/nonaktif petunjuk untuk impostor</li>
+                        <li style="margin-bottom: 8px;">Atur durasi ronde (1-5 menit)</li>
+                        <li style="margin-bottom: 8px;">Pilih kategori favorit</li>
+                    </ul>
+                </div>
+                
+                <!-- How to Run -->
+                <div class="card">
+                    <h2 class="card-title"><i class="fas fa-terminal"></i> Cara Menjalankan</h2>
+                    <p>Aplikasi ini dibangun dengan <strong>React Native</strong> dan <strong>Expo</strong>. Untuk menjalankannya:</p>
+                    
+                    <div class="code-block">
+                        <code>
+# Clone repository<br>
+git clone https://github.com/username/GameImpostor.git<br><br>
+                            
+# Masuk ke folder proyek<br>
+cd GameImpostor<br><br>
+                            
+# Install dependencies<br>
+npm install<br><br>
+                            
+# Jalankan aplikasi<br>
+npx expo start<br><br>
+                            
+# Scan QR code dengan Expo Go di smartphone
+                        </code>
+                    </div>
+                    
+                    <p style="margin-top: 15px;">Atau build untuk production:</p>
+                    <div class="code-block">
+                        <code>
+# Build untuk Android<br>
+npx expo run:android<br><br>
+                            
+# Build untuk iOS (hanya di Mac)<br>
+npx expo run:ios
+                        </code>
+                    </div>
+                </div>
+                
+                <!-- Screenshots Demo -->
+                <div class="card">
+                    <h2 class="card-title"><i class="fas fa-mobile-alt"></i> Tampilan Game</h2>
+                    
+                    <div style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin: 20px 0;">
+                        <div style="text-align: center;">
+                            <div style="width: 120px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 20px; margin: 0 auto 10px; display: flex; flex-direction: column; justify-content: center; padding: 15px;">
+                                <div style="font-size: 0.8rem; margin-bottom: 10px;">06.02</div>
+                                <div style="font-weight: bold; margin-bottom: 15px;">Players</div>
+                                <div style="background: rgba(255,255,255,0.2); padding: 8px; border-radius: 5px; margin: 5px 0;">Ray</div>
+                                <div style="background: rgba(255,255,255,0.2); padding: 8px; border-radius: 5px; margin: 5px 0;">Je</div>
+                                <div style="background: rgba(255,255,255,0.1); padding: 8px; border-radius: 5px; margin: 5px 0; color: rgba(255,255,255,0.5);">Enter player name</div>
+                            </div>
+                            <div style="font-size: 0.9rem;">Tambah Pemain</div>
+                        </div>
+                        
+                        <div style="text-align: center;">
+                            <div style="width: 120px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 20px; margin: 0 auto 10px; display: flex; flex-direction: column; justify-content: center; padding: 15px;">
+                                <div style="font-size: 0.8rem; margin-bottom: 10px;">06.03</div>
+                                <div style="font-weight: bold; margin-bottom: 15px;">Categories</div>
+                                <div style="background: rgba(108, 99, 255, 0.3); padding: 8px; border-radius: 5px; margin: 5px 0; font-size: 0.9rem;">🎉 Party Time</div>
+                                <div style="background: rgba(255,255,255,0.1); padding: 8px; border-radius: 5px; margin: 5px 0; font-size: 0.9rem;">🌟 Celebrities</div>
+                                <div style="background: rgba(255,255,255,0.1); padding: 8px; border-radius: 5px; margin: 5px 0; font-size: 0.9rem;">🍕 Food</div>
+                            </div>
+                            <div style="font-size: 0.9rem;">Pilih Kategori</div>
+                        </div>
+                        
+                        <div style="text-align: center;">
+                            <div style="width: 120px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 20px; margin: 0 auto 10px; display: flex; flex-direction: column; justify-content: center; padding: 15px; align-items: center;">
+                                <div style="font-size: 1.5rem; margin-bottom: 20px;">👤 Ray</div>
+                                <div style="text-align: center; font-size: 0.9rem; margin-bottom: 15px; color: rgba(255,255,255,0.7);">Swipe up to reveal the secret word</div>
+                                <div style="font-size: 2rem;">↑</div>
+                            </div>
+                            <div style="font-size: 0.9rem;">Swipe to Reveal</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
+        
+        <!-- Action Buttons -->
+        <div style="text-align: center; margin: 40px 0;">
+            <div class="buttons">
+                <a href="https://github.com/username/GameImpostor" class="btn btn-primary" target="_blank">
+                    <i class="fab fa-github"></i> Lihat Kode di GitHub
+                </a>
+                <a href="#demo" class="btn btn-secondary">
+                    <i class="fas fa-play"></i> Coba Demo
+                </a>
+                <a href="#download" class="btn btn-accent">
+                    <i class="fas fa-download"></i> Download APK
+                </a>
+            </div>
+        </div>
+        
+        <!-- Tech Stack -->
+        <div class="card">
+            <h2 class="card-title"><i class="fas fa-code"></i> Teknologi</h2>
+            <div class="tech-stack">
+                <div class="tech-icon">
+                    <i class="fab fa-react" style="color: #61DAFB;"></i>
+                    <span>React Native</span>
+                </div>
+                <div class="tech-icon">
+                    <i class="fas fa-mobile-alt" style="color: #6C63FF;"></i>
+                    <span>Expo</span>
+                </div>
+                <div class="tech-icon">
+                    <i class="fab fa-js-square" style="color: #FFD166;"></i>
+                    <span>JavaScript</span>
+                </div>
+                <div class="tech-icon">
+                    <i class="fas fa-paint-brush" style="color: #FF6B6B;"></i>
+                    <span>Custom UI</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <footer class="footer">
+            <p>🎮 <strong>GameImpostor</strong> - Game tebak kata dengan impostor yang seru dan menantang!</p>
+            <p style="margin-top: 10px;">Dikembangkan dengan ❤️ untuk hiburan bersama teman dan keluarga.</p>
+            <p style="margin-top: 20px; font-size: 0.8rem; color: rgba(255, 255, 255, 0.5);">
+                &copy; 2024 GameImpostor. Semua hak cipta dilindungi undang-undang.
+            </p>
+        </footer>
     </div>
+    
+    <script>
+        // Simple animations and interactions
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate features on scroll
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+            
+            // Animate cards
+            document.querySelectorAll('.card').forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                observer.observe(card);
+            });
+            
+            // Animate features
+            document.querySelectorAll('.feature').forEach((feature, index) => {
+                feature.style.opacity = '0';
+                feature.style.transform = 'translateY(20px)';
+                feature.style.transition = `opacity 0.5s ease ${index * 0.1}s, transform 0.5s ease ${index * 0.1}s`;
+                observer.observe(feature);
+            });
+            
+            // Demo button interaction
+            const demoBtn = document.querySelector('a[href="#demo"]');
+            if (demoBtn) {
+                demoBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    alert('🚀 Demo akan segera hadir! Untuk sekarang, Anda bisa clone repository dan jalankan dengan Expo.');
+                });
+            }
+            
+            // Download button interaction
+            const downloadBtn = document.querySelector('a[href="#download"]');
+            if (downloadBtn) {
+                downloadBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    alert('📱 APK akan tersedia setelah build production. Jalankan: npx expo run:android');
+                });
+            }
+            
+            // Category hover effect
+            document.querySelectorAll('.category').forEach(category => {
+                category.addEventListener('mouseenter', function() {
+                    this.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.2)';
+                });
+                
+                category.addEventListener('mouseleave', function() {
+                    this.style.boxShadow = 'none';
+                });
+            });
+        });
+    </script>
 </body>
-</html>
+    </html>
