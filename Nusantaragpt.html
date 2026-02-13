@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Kekaisaran Dunia – Insane v3</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Segoe UI, sans-serif;
+    background:radial-gradient(circle at top,#020617,#000);
+    color:white;
+    overflow:hidden;
+}
+.topbar,.bottombar{
+    height:55px;
+    background:rgba(15,23,42,0.95);
+    display:flex;
+    justify-content:space-around;
+    align-items:center;
+    font-size:12px;
+    border:1px solid rgba(255,255,255,0.08);
+}
+.container{display:flex;height:calc(100vh - 110px);}
+.sidebar{
+    width:140px;
+    background:rgba(15,23,42,0.7);
+    border-right:1px solid rgba(255,255,255,0.1);
+}
+.btn{
+    margin:6px;
+    padding:8px;
+    font-size:11px;
+    text-align:center;
+    border-radius:10px;
+    cursor:pointer;
+    background:linear-gradient(145deg,#1e293b,#0f172a);
+    border:1px solid rgba(255,255,255,0.1);
+}
+.btn:hover{background:linear-gradient(145deg,#38bdf8,#6366f1);}
+.map-area{flex:1;background:black;}
+svg{width:100%;height:100%;}
+.country{
+    fill:#1e293b;
+    stroke:#38bdf8;
+    stroke-width:0.4;
+    cursor:pointer;
+}
+.player{fill:#22c55e!important;}
+.enemy{fill:#ef4444!important;}
+.ally{fill:#3b82f6!important;}
+.panel{
+    width:340px;
+    background:rgba(15,23,42,0.95);
+    border-left:1px solid rgba(255,255,255,0.1);
+    padding:10px;
+    font-size:11px;
+}
+.log{max-height:150px;overflow-y:auto;font-size:10px;}
+.warn{color:#f87171;}
+.good{color:#4ade80;}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+💰 <span id="money"></span>
+🏭 Industri <span id="industry"></span>
+🔬 Sains <span id="science"></span>
+⚔ Army <span id="army"></span>
+🛡 Defense <span id="defense"></span>
+☢ Nuklir <span id="nukes"></span>
+😊 Stabilitas <span id="stability"></span>
+🔥 Chaos <span id="chaos"></span>
+📅 <span id="year"></span>
+</div>
+
+<div class="container">
+
+<div class="sidebar">
+<div class="btn" onclick="tax()">Pajak</div>
+<div class="btn" onclick="buildIndustry()">Industri</div>
+<div class="btn" onclick="research()">Riset</div>
+<div class="btn" onclick="recruitArmy()">Rekrut Army</div>
+<div class="btn" onclick="fortify()">Fortify</div>
+<div class="btn" onclick="diplomacy()">Diplomasi</div>
+<div class="btn" onclick="cyber()">Cyberwar</div>
+<div class="btn" onclick="invade()">Invasi</div>
+<div class="btn" onclick="buildNuke()">Bangun Nuklir</div>
+<div class="btn" onclick="launchNuke()">Launch Nuklir</div>
+<div class="btn" onclick="politics()">Politik</div>
+</div>
+
+<div class="map-area">
+<svg viewBox="0 0 1000 500">
+    <path class="country" id="USA" d="M120 130 L260 110 L280 200 L140 220 Z"/>
+    <path class="country" id="Brazil" d="M200 240 L320 260 L300 380 L210 360 Z"/>
+    <path class="country" id="UK" d="M460 90 L500 95 L495 130 L455 125 Z"/>
+    <path class="country" id="Germany" d="M520 110 L580 115 L575 170 L525 165 Z"/>
+    <path class="country player" id="Indonesia" d="M700 260 L760 255 L770 285 L710 295 Z"/>
+    <path class="country" id="China" d="M650 140 L780 130 L800 220 L670 230 Z"/>
+    <path class="country" id="Japan" d="M820 150 L850 155 L845 190 L815 185 Z"/>
+</svg>
+</div>
+
+<div class="panel">
+<h3>🌍 Negara</h3>
+<div id="info">Pilih negara...</div>
+
+<h4>📊 Statistik</h4>
+<div id="stats"></div>
+
+<h4>📜 Log Dunia</h4>
+<div class="log" id="log"></div>
+</div>
+
+</div>
+
+<div class="bottombar">
+<button onclick="nextTurn()">▶ PASS TURN</button>
+<button onclick="saveGame()">💾 Save</button>
+<button onclick="loadGame()">📂 Load</button>
+</div>
+
+<script>
+let selected=null;
+
+let state={
+    money:3200,
+    industry:55,
+    science:40,
+    army:110,
+    defense:60,
+    nukes:1,
+    stability:78,
+    chaos:12,
+    territory:["Indonesia"],
+    relations:{USA:50,Brazil:50,UK:50,Germany:50,China:50,Japan:50},
+    year:2027
+};
+
+let ai={
+    USA:{army:120,def:80},
+    China:{army:140,def:70},
+    Germany:{army:75,def:60},
+    Japan:{army:65,def:55},
+    Brazil:{army:60,def:45},
+    UK:{army:70,def:60}
+};
+
+function log(msg){
+    logEl.innerHTML="• "+msg+"<br>"+logEl.innerHTML;
+}
+
+function updateUI(){
+    money.textContent=Math.floor(state.money);
+    industry.textContent=state.industry;
+    science.textContent=state.science;
+    army.textContent=state.army;
+    defense.textContent=state.defense;
+    nukes.textContent=state.nukes;
+    stability.textContent=Math.floor(state.stability);
+    chaos.textContent=Math.floor(state.chaos);
+    year.textContent=state.year;
+
+    stats.innerHTML=`
+    Territory: ${state.territory.length}<br>
+    Chaos Dunia: ${state.chaos}<br>
+    Stabilitas: ${Math.floor(state.stability)}%
+    `;
+}
+
+/* ACTIONS */
+function tax(){
+    state.money+=400;
+    state.stability-=4;
+    state.chaos+=1;
+    log("Pajak dinaikkan.");
+    updateUI();
+}
+
+function buildIndustry(){
+    state.money-=300;
+    state.industry+=8;
+    log("Industri meningkat.");
+    updateUI();
+}
+
+function research(){
+    state.money-=250;
+    state.science+=9;
+    log("Kemajuan teknologi.");
+    updateUI();
+}
+
+function recruitArmy(){
+    state.money-=280;
+    state.army+=15;
+    state.stability-=1;
+    log("Rekrutmen militer.");
+    updateUI();
+}
+
+function fortify(){
+    state.money-=220;
+    state.defense+=12;
+    log("Pertahanan diperkuat.");
+    updateUI();
+}
+
+function diplomacy(){
+    if(!selected) return alert("Pilih negara");
+    state.money-=130;
+    state.relations[selected]+=10;
+    log("Diplomasi dengan "+selected);
+    updateRelations();
+}
+
+function cyber(){
+    if(!selected) return alert("Pilih target");
+    state.money-=180;
+    if(Math.random()>0.5){
+        ai[selected].army-=10;
+        log("🛰 Cyber attack sukses ke "+selected);
+    } else {
+        state.stability-=3;
+        log("Cyber attack gagal.");
+    }
+    updateUI();
+}
+
+/* WAR */
+function invade(){
+    if(!selected) return alert("Pilih target");
+
+    let p = state.army + Math.random()*40;
+    let e = ai[selected].army + ai[selected].def + Math.random()*50;
+
+    state.money-=350;
+
+    if(p>e){
+        if(!state.territory.includes(selected)){
+            state.territory.push(selected);
+            document.getElementById(selected)?.classList.add("player");
+        }
+        state.stability+=2;
+        state.chaos+=2;
+        log("⚔ Menang perang vs "+selected);
+    } else {
+        state.stability-=7;
+        state.chaos+=3;
+        log("<span class='warn'>Kalah perang!</span>");
+    }
+    updateUI();
+}
+
+/* NUKLIR */
+function buildNuke(){
+    state.money-=600;
+    state.science-=5;
+    state.nukes++;
+    state.chaos+=4;
+    log("☢ Nuklir dibangun.");
+    updateUI();
+}
+
+function launchNuke(){
+    if(!selected) return alert("Pilih target");
+    if(state.nukes<=0) return alert("Tidak ada nuklir");
+
+    state.nukes--;
+    ai[selected].army*=0.6;
+    state.chaos+=10;
+    state.stability-=9;
+    log("💥 Nuklir diluncurkan ke "+selected);
+
+    if(Math.random()>0.5){
+        log("<span class='warn'>☢ Retaliasi nuklir!</span>");
+        state.stability-=12;
+        state.money*=0.7;
+    }
+    updateUI();
+}
+
+/* POLITICS */
+function politics(){
+    let r=Math.random();
+    if(r<0.4){
+        state.stability+=5;
+        log("🗳 Reformasi sukses.");
+    } else if(r<0.7){
+        state.stability-=6;
+        log("<span class='warn'>💥 Skandal politik!</span>");
+    } else {
+        log("<span class='warn'>🔥 Kudeta percobaan!</span>");
+        if(Math.random()>0.5){
+            state.money*=0.5;
+            state.army*=0.7;
+            state.stability=55;
+            log("❌ Kudeta sukses.");
+        } else {
+            log("🛡 Kudeta digagalkan.");
+        }
+    }
+    updateUI();
+}
+
+/* AI EXPANSION */
+function aiExpansion(){
+    Object.keys(ai).forEach(c=>{
+        if(Math.random()<0.25){
+            ai[c].army+=5;
+        }
+    });
+}
+
+/* EVENTS */
+function randomEvent(){
+    let r=Math.random();
+    if(r<0.3){
+        state.money+=300;
+        log("📈 Boom ekonomi.");
+    } else if(r<0.6){
+        state.stability-=5;
+        log("<span class='warn'>Kerusuhan!</span>");
+    } else {
+        state.chaos+=2;
+        log("🔥 Konflik global.");
+    }
+}
+
+/* STABILITY */
+function stabilityCheck(){
+    if(state.stability<35){
+        log("<span class='warn'>💥 Negara hampir runtuh!</span>");
+    }
+    if(state.stability<15){
+        log("<span class='warn'>☠ Pemerintahan runtuh!</span>");
+        state.money*=0.4;
+        state.army*=0.6;
+        state.stability=60;
+    }
+}
+
+/* TURN */
+function nextTurn(){
+    state.year++;
+    state.money += state.industry*7;
+    state.science += 2;
+    aiExpansion();
+    randomEvent();
+    stabilityCheck();
+    updateRelations();
+}
+
+/* RELATIONS */
+function updateRelations(){
+    Object.keys(state.relations).forEach(c=>{
+        const el=document.getElementById(c);
+        if(!el) return;
+        el.classList.remove("ally","enemy");
+        if(state.relations[c]>70) el.classList.add("ally");
+        if(state.relations[c]<30) el.classList.add("enemy");
+    });
+    updateUI();
+}
+
+/* SAVE */
+function saveGame(){
+    localStorage.setItem("insaneV3",JSON.stringify(state));
+    log("Game disimpan.");
+}
+function loadGame(){
+    let save=localStorage.getItem("insaneV3");
+    if(save){
+        state=JSON.parse(save);
+        log("Game dimuat.");
+        updateRelations();
+    }
+}
+
+/* CLICK MAP */
+document.querySelectorAll(".country").forEach(c=>{
+    c.addEventListener("click",()=>{
+        selected=c.id;
+        info.innerHTML=`
+        <b>${selected}</b><br>
+        Army: ${ai[selected]?.army || "-"}<br>
+        Defense: ${ai[selected]?.def || "-"}<br>
+        Relation: ${Math.floor(state.relations[selected]||0)}
+        `;
+    });
+});
+
+const money=document.getElementById("money");
+const industry=document.getElementById("industry");
+const science=document.getElementById("science");
+const army=document.getElementById("army");
+const defense=document.getElementById("defense");
+const nukes=document.getElementById("nukes");
+const stability=document.getElementById("stability");
+const chaos=document.getElementById("chaos");
+const year=document.getElementById("year");
+const stats=document.getElementById("stats");
+const logEl=document.getElementById("log");
+const info=document.getElementById("info");
+
+updateUI();
+</script>
+
+</body>
+                                                     </html>
